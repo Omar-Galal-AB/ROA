@@ -1,0 +1,132 @@
+# ROC Robot Registry Configuration
+# Defines robot tracking and state management settings
+
+registry:
+  # Maximum simultaneous robots
+  max_robots: 10
+  
+  # Robot discovery settings
+  discovery:
+    # How robots are discovered
+    sources:
+      - "fti_import"     # When FTI imports a robot
+      - "ros2_topic"     # From ROS2 robot_description topic
+      - "ue5_registration"  # When UE5 registers a spawned robot
+      
+    # Auto-register on discovery
+    auto_register: true
+    
+    # Timeout for incomplete registrations (ms)
+    registration_timeout: 30000
+
+# Robot state tracking
+state:
+  # Update rates
+  update_rates:
+    joint_states: 60.0     # Hz - from DIMC
+    obstacles: 20.0        # Hz - from DIMC
+    boundaries: 10.0       # Hz - from DIMC
+    status: 10.0           # Hz - to UE5
+    
+  # State history
+  history:
+    enabled: true
+    max_entries: 1000      # Per robot
+    joint_positions: true  # Track joint position history
+    commands: true         # Track command history
+    
+  # Stale data thresholds (ms)
+  stale_thresholds:
+    joint_state: 200       # Joint data older than this is stale
+    obstacle: 500          # Obstacle data older than this is stale
+    heartbeat: 3000        # UE5 heartbeat timeout
+
+# Joint tracking
+joints:
+  # How to identify joints
+  identification:
+    use_urdf_names: true   # Use names from URDF/FTI
+    use_ue5_constraint_names: true  # Map to UE5 physics constraint names
+    
+  # State tracking per joint
+  track:
+    - position
+    - velocity
+    - effort
+    - target_position
+    - is_moving
+    - at_limit
+    - error_state
+    
+  # Joint grouping (optional)
+  groups:
+    arm_joints: ["shoulder*", "elbow*", "wrist*"]
+    gripper_joints: ["gripper*", "finger*"]
+    base_joints: ["base*", "wheel*"]
+
+# Integration with other components
+integration:
+  fti:
+    # Topic to receive robot specs from FTI
+    robot_specs_topic: "/fti/robot_specs"
+    
+    # Required fields from FTI
+    required_fields:
+      - "robot_id"
+      - "joints"
+      - "joints.*.name"
+      - "joints.*.type"
+      - "joints.*.limits"
+      
+    # Optional but recommended
+    recommended_fields:
+      - "joints.*.ue5_constraint_name"
+      - "robot_capabilities"
+      
+  dimc:
+    # Topics to receive data from DIMC
+    joint_states_topic: "/dimc/{robot_id}/joint_states"
+    obstacles_topic: "/dimc/{robot_id}/obstacles"
+    boundaries_topic: "/dimc/{robot_id}/boundaries"
+    
+    # Message queue depth
+    queue_depth: 10
+    
+  comc:
+    # Topic to publish validated commands
+    command_topic: "/roc/{robot_id}/commands"
+    
+    # QoS settings
+    qos:
+      reliability: "reliable"
+      durability: "volatile"
+      history_depth: 10
+
+# Default robot configuration (when FTI data incomplete)
+defaults:
+  # Default joint limits (radians)
+  joint_limits:
+    revolute:
+      min: -3.14159
+      max: 3.14159
+      velocity: 2.0
+      effort: 100.0
+    prismatic:
+      min: 0.0
+      max: 1.0
+      velocity: 0.5
+      effort: 50.0
+      
+  # Default control mode
+  initial_mode: "rpm"
+  
+  # Default safety status
+  initial_status: "ready"
+
+# Logging
+logging:
+  log_registrations: true
+  log_state_changes: true
+  log_mode_changes: true
+  log_errors: true
+  log_file: "/tmp/roc_registry.log"

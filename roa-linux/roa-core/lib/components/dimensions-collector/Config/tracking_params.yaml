@@ -1,0 +1,24 @@
+tracking:
+  position:
+    update_rate: 60  # Hz
+    precision: 0.001  # meters
+    coordinate_system: "world"
+    history_size: 300  # 5 seconds at 60Hz
+  
+  orientation:
+    update_rate: 60  # Hz
+    format: "quaternion"  # or "euler"
+    
+  velocity:
+    update_rate: 60  # Hz
+    window_size: 10  # samples for smoothing
+    
+  distance:
+    update_rate: 20  # Hz (less frequent)
+    max_distance: 100.0  # meters (ignore beyond this)
+
+measurement:
+  use_visual_mesh: true
+  use_collision_mesh: true
+  bounding_box_type: "AABB"  # or "OBB"
+  safety_margin: 0.1  # meters

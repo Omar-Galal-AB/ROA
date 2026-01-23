@@ -1,0 +1,88 @@
+{
+  "component": {
+    "name": "COMC",
+    "version": "0.1.0",
+    "description": "Communication Center for multi-robot coordination"
+  },
+  "ros2": {
+    "node_name": "communication_center",
+    "topics": {
+      "published": {
+        "/robots/work_areas": {
+          "type": "std_msgs/String",
+          "qos": "COORDINATION_QOS",
+          "rate_hz": 20,
+          "description": "Broadcast robot work areas"
+        },
+        "/robots/proximity_alert": {
+          "type": "std_msgs/String",
+          "qos": "SAFETY_QOS",
+          "rate_hz": 60,
+          "description": "Proximity collision warnings"
+        },
+        "/comc/{robot_id}/status": {
+          "type": "std_msgs/String",
+          "qos": "STATUS_QOS",
+          "rate_hz": 2,
+          "description": "Health status for Webthread"
+        }
+      },
+      "subscribed": {
+        "/robots/work_areas": {
+          "type": "std_msgs/String",
+          "qos": "COORDINATION_QOS",
+          "description": "Work areas from other robots"
+        },
+        "/robot/{robot_id}/pose": {
+          "type": "std_msgs/String",
+          "description": "Robot position from DIMC"
+        }
+      }
+    },
+    "services": {
+      "provided": {
+        "/comc/coordinate_task": {
+          "type": "CoordinateTask",
+          "description": "Request multi-robot task coordination"
+        },
+        "/comc/reserve_area": {
+          "type": "ReserveArea",
+          "description": "Reserve spatial work area"
+        },
+        "/comc/query_proximity": {
+          "type": "QueryProximity",
+          "description": "Query distances to nearby robots"
+        }
+      }
+    }
+  },
+  "webthread_integration": {
+    "startup_priority": 4,
+    "health_check": {
+      "topic": "/comc/{robot_id}/status",
+      "frequency_hz": 2,
+      "timeout_seconds": 1.5
+    },
+    "criticality": "PARTIAL",
+    "degraded_mode": "SINGLE_ROBOT",
+    "restart_on_failure": true
+  },
+  "dependencies": {
+    "required": {
+      "DIMC": "Position and velocity data",
+      "Webthread": "Health monitoring and coordination"
+    },
+    "optional": {
+      "ROC": "Evasion command execution"
+    }
+  },
+  "performance": {
+    "latency_targets": {
+      "safety_messages_ms": 20,
+      "coordination_messages_ms": 50,
+      "status_messages_ms": 100
+    },
+    "max_robots": 8,
+    "optimized_for": 4
+  }
+}

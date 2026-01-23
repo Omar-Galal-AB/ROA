@@ -1,0 +1,393 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "version": "2.0.0",
+    "description": "DIMC Default Sensor Profiles - Fallback configurations when URDF data is incomplete",
+    
+    "robot_types": {
+        "IndustrialArm": {
+            "description": "Industrial robotic arms (KUKA, ABB, Fanuc, etc.)",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "BaseLidar",
+                    "mount_offset": {"x": 0, "y": 0, "z": 50, "roll": 0, "pitch": 0, "yaw": 0},
+                    "ray_count": 180,
+                    "range_min_cm": 10.0,
+                    "range_max_cm": 500.0,
+                    "fov_horizontal_deg": 360.0,
+                    "update_rate_hz": 30.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 50.0,
+                    "stop_radius_cm": 30.0
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 150.0,
+                    "stop_radius_cm": 100.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 300.0,
+                    "stop_radius_cm": 200.0
+                }
+            ],
+            "default_dimensions": {
+                "reach_cm": 200.0,
+                "base_width_cm": 40.0,
+                "base_height_cm": 30.0,
+                "comment": "Used only when URDF provides no dimensions"
+            }
+        },
+        
+        "MobileRobot": {
+            "description": "Wheeled or tracked mobile robots (AMRs, AGVs)",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "FrontLidar",
+                    "mount_offset": {"x": 20, "y": 0, "z": 30, "roll": 0, "pitch": 0, "yaw": 0},
+                    "ray_count": 360,
+                    "range_min_cm": 5.0,
+                    "range_max_cm": 1200.0,
+                    "fov_horizontal_deg": 270.0,
+                    "update_rate_hz": 30.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 30.0,
+                    "stop_radius_cm": 15.0
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 80.0,
+                    "stop_radius_cm": 50.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 200.0,
+                    "stop_radius_cm": 120.0
+                }
+            ],
+            "default_dimensions": {
+                "length_cm": 60.0,
+                "width_cm": 40.0,
+                "height_cm": 50.0
+            }
+        },
+        
+        "Humanoid": {
+            "description": "Bipedal humanoid robots",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "HeadLidar",
+                    "mount_offset": {"x": 10, "y": 0, "z": 170, "roll": 0, "pitch": 0, "yaw": 0},
+                    "ray_count": 240,
+                    "range_min_cm": 10.0,
+                    "range_max_cm": 800.0,
+                    "fov_horizontal_deg": 180.0,
+                    "update_rate_hz": 30.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 40.0,
+                    "stop_radius_cm": 20.0
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 100.0,
+                    "stop_radius_cm": 60.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 200.0,
+                    "stop_radius_cm": 150.0
+                }
+            ],
+            "default_dimensions": {
+                "height_cm": 180.0,
+                "width_cm": 50.0,
+                "depth_cm": 30.0
+            }
+        },
+        
+        "Drone": {
+            "description": "Aerial vehicles (quadcopters, multirotors, UAVs)",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "ForwardLidar",
+                    "mount_offset": {"x": 10, "y": 0, "z": 0, "roll": 0, "pitch": -30, "yaw": 0},
+                    "ray_count": 120,
+                    "range_min_cm": 5.0,
+                    "range_max_cm": 2000.0,
+                    "fov_horizontal_deg": 90.0,
+                    "update_rate_hz": 30.0,
+                    "enabled": true
+                },
+                {
+                    "type": "Ultrasonic",
+                    "name": "DownwardSonar",
+                    "mount_offset": {"x": 0, "y": 0, "z": -5, "roll": 0, "pitch": -90, "yaw": 0},
+                    "range_min_cm": 2.0,
+                    "range_max_cm": 500.0,
+                    "update_rate_hz": 20.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 100.0,
+                    "stop_radius_cm": 50.0
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 300.0,
+                    "stop_radius_cm": 200.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 500.0,
+                    "stop_radius_cm": 400.0
+                }
+            ],
+            "default_dimensions": {
+                "diameter_cm": 50.0,
+                "height_cm": 20.0
+            }
+        },
+        
+        "Collaborative": {
+            "description": "Collaborative robots designed for human interaction (cobots)",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "SafetyLidar",
+                    "mount_offset": {"x": 0, "y": 0, "z": 30, "roll": 0, "pitch": 0, "yaw": 0},
+                    "ray_count": 360,
+                    "range_min_cm": 5.0,
+                    "range_max_cm": 300.0,
+                    "fov_horizontal_deg": 360.0,
+                    "update_rate_hz": 60.0,
+                    "enabled": true,
+                    "comment": "Higher update rate for human safety"
+                },
+                {
+                    "type": "ProximitySensor",
+                    "name": "SkinSensors",
+                    "coverage": "full_arm",
+                    "range_cm": 15.0,
+                    "update_rate_hz": 100.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 20.0,
+                    "stop_radius_cm": 10.0,
+                    "comment": "Very tight zones for cobot safety"
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 50.0,
+                    "stop_radius_cm": 30.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 100.0,
+                    "stop_radius_cm": 70.0
+                }
+            ],
+            "default_dimensions": {
+                "reach_cm": 120.0,
+                "base_width_cm": 20.0,
+                "payload_kg": 10.0
+            }
+        },
+        
+        "SingleActuator": {
+            "description": "Simple single-joint actuators",
+            "default_sensors": [
+                {
+                    "type": "Encoder",
+                    "name": "JointEncoder",
+                    "resolution_deg": 0.01,
+                    "update_rate_hz": 1000.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 10.0,
+                    "stop_radius_cm": 5.0
+                }
+            ],
+            "default_dimensions": {
+                "length_cm": 30.0,
+                "width_cm": 10.0
+            }
+        },
+        
+        "Generic": {
+            "description": "Generic fallback for unknown robot types",
+            "default_sensors": [
+                {
+                    "type": "LIDAR",
+                    "name": "GenericLidar",
+                    "mount_offset": {"x": 0, "y": 0, "z": 0, "roll": 0, "pitch": 0, "yaw": 0},
+                    "ray_count": 90,
+                    "range_min_cm": 5.0,
+                    "range_max_cm": 500.0,
+                    "fov_horizontal_deg": 180.0,
+                    "update_rate_hz": 30.0,
+                    "enabled": true
+                }
+            ],
+            "safety_zones": [
+                {
+                    "name": "CriticalZone",
+                    "color": "#FF0000",
+                    "warning_radius_cm": 30.0,
+                    "stop_radius_cm": 15.0
+                },
+                {
+                    "name": "WarningZone",
+                    "color": "#FFFF00",
+                    "warning_radius_cm": 80.0,
+                    "stop_radius_cm": 50.0
+                },
+                {
+                    "name": "CautionZone",
+                    "color": "#00FF00",
+                    "warning_radius_cm": 150.0,
+                    "stop_radius_cm": 100.0
+                }
+            ],
+            "default_dimensions": {
+                "length_cm": 50.0,
+                "width_cm": 50.0,
+                "height_cm": 50.0
+            }
+        }
+    },
+    
+    "sensor_types": {
+        "LIDAR": {
+            "description": "Light Detection and Ranging sensor",
+            "default_params": {
+                "ray_count": 180,
+                "range_min_cm": 5.0,
+                "range_max_cm": 1000.0,
+                "fov_horizontal_deg": 180.0,
+                "fov_vertical_deg": 30.0,
+                "update_rate_hz": 30.0
+            }
+        },
+        "DepthCamera": {
+            "description": "Depth-sensing camera (Kinect, RealSense, etc.)",
+            "default_params": {
+                "resolution_x": 640,
+                "resolution_y": 480,
+                "range_min_cm": 30.0,
+                "range_max_cm": 500.0,
+                "fov_horizontal_deg": 87.0,
+                "fov_vertical_deg": 58.0,
+                "update_rate_hz": 30.0
+            }
+        },
+        "Ultrasonic": {
+            "description": "Ultrasonic distance sensor",
+            "default_params": {
+                "range_min_cm": 2.0,
+                "range_max_cm": 400.0,
+                "beam_angle_deg": 15.0,
+                "update_rate_hz": 20.0
+            }
+        },
+        "IMU": {
+            "description": "Inertial Measurement Unit",
+            "default_params": {
+                "accel_range_g": 16.0,
+                "gyro_range_dps": 2000.0,
+                "update_rate_hz": 200.0
+            }
+        },
+        "Encoder": {
+            "description": "Rotary or linear encoder",
+            "default_params": {
+                "resolution_deg": 0.01,
+                "update_rate_hz": 1000.0
+            }
+        },
+        "ProximitySensor": {
+            "description": "Capacitive/IR proximity sensor",
+            "default_params": {
+                "range_cm": 20.0,
+                "update_rate_hz": 100.0
+            }
+        },
+        "ContactSensor": {
+            "description": "Force/contact sensing",
+            "default_params": {
+                "threshold_n": 1.0,
+                "update_rate_hz": 200.0
+            }
+        }
+    },
+    
+    "dimension_calculation_rules": {
+        "from_mesh": {
+            "description": "Calculate dimensions from mesh bounds",
+            "method": "axis_aligned_bounding_box",
+            "padding_percent": 5.0
+        },
+        "from_urdf_links": {
+            "description": "Calculate from URDF link geometries",
+            "method": "composite_bounds",
+            "include_collision_geometry": true
+        },
+        "fallback_estimation": {
+            "description": "Estimate based on robot type",
+            "method": "type_based_defaults",
+            "scale_factor": 1.0
+        }
+    },
+    
+    "unit_conventions": {
+        "position": "centimeters",
+        "angles": "degrees",
+        "velocity": "cm_per_second",
+        "time": "seconds",
+        "note": "All values in this config are in UE5 units (cm). ROA Bridge converts to SI (meters) for ROS2."
+    }
+}

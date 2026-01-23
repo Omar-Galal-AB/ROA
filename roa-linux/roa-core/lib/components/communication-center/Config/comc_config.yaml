@@ -1,0 +1,31 @@
+# COMC Configuration
+
+comc:
+  node_name: "communication_center"
+  
+  # Proximity monitoring settings
+  proximity:
+    alert_threshold_warning: 0.5   # meters
+    alert_threshold_caution: 0.3   # meters
+    alert_threshold_critical: 0.1  # meters
+    update_rate: 60                # Hz (matches DIMC)
+  
+  # Work area management settings
+  work_area:
+    broadcast_rate: 20             # Hz
+    default_margin: 0.1            # meters (safety buffer)
+    stale_timeout: 5.0             # seconds
+  
+  # Task coordination settings
+  task_coordination:
+    max_wait_time: 10.0            # seconds (deadlock timeout)
+    priority_levels: 5             # 0=lowest, 4=highest
+  
+  # Performance settings
+  performance:
+    max_robots: 8
+    message_queue_size: 100
+  
+  # Health monitoring
+  health:
+    heartbeat_rate: 2.0            # Hz (status updates to Webthread)

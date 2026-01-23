@@ -1,0 +1,115 @@
+---
+# Prometheus Configuration for ROA Components
+#
+# This configuration scrapes metrics from all ROA components
+# and stores them for querying by Grafana
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'roa-local'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alerts.yml"
+
+# Scrape configurations
+scrape_configs:
+  # ===========================================================================
+  # ROA Component Metrics
+  # ===========================================================================
+  
+  # Webthread - HTTP server, UI, coordination
+  - job_name: 'roa-webthread'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          component: 'webthread'
+          tier: 'frontend'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    
+  # DIMC - Dimensions Collector (sensors, point clouds)
+  - job_name: 'roa-dimc'
+    static_configs:
+      - targets: ['localhost:9091']
+        labels:
+          component: 'dimc'
+          tier: 'perception'
+    scrape_interval: 15s
+    
+  # ROC - Robot Operator Controller
+  - job_name: 'roa-roc'
+    static_configs:
+      - targets: ['localhost:9092']
+        labels:
+          component: 'roc'
+          tier: 'control'
+    scrape_interval: 15s
+    
+  # COMC - Communication Center (ROS2 bridge)
+  - job_name: 'roa-comc'
+    static_configs:
+      - targets: ['localhost:9093']
+        labels:
+          component: 'comc'
+          tier: 'middleware'
+    scrape_interval: 15s
+    
+  # FTI - Files Type Importer
+  - job_name: 'roa-fti'
+    static_configs:
+      - targets: ['localhost:9094']
+        labels:
+          component: 'fti'
+          tier: 'backend'
+    scrape_interval: 15s
+  
+  # ===========================================================================
+  # Infrastructure Metrics
+  # ===========================================================================
+  
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          component: 'prometheus'
+          tier: 'observability'
+  
+  # Node exporter (system metrics - optional)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['localhost:9100']
+  #       labels:
+  #         tier: 'infrastructure'
+  
+  # cAdvisor (container metrics - optional)
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['localhost:8080']
+  #       labels:
+  #         tier: 'infrastructure'
+
+# ===========================================================================
+# Recording Rules (Pre-computed queries)
+# ===========================================================================
+# Uncomment to enable recording rules
+# rule_files:
+#   - 'recording_rules.yml'
+
+# ===========================================================================
+# Storage Configuration
+# ===========================================================================
+# Default retention: 15 days
+# Override with: --storage.tsdb.retention.time=30d

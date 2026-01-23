@@ -1,0 +1,10 @@
+# QueryProximity.srv
+# Query distances to nearby robots
+
+# Request
+string robot_id
+
+---
+# Response
+string[] nearby_robot_ids
+float64[] distances  # meters

@@ -1,0 +1,81 @@
+{
+  "profile_name": "Default",
+  "rpm_mode": {
+    "move_forward": "W",
+    "move_left": "A",
+    "move_back": "S",
+    "move_right": "D",
+    "turn_left": "Q",
+    "turn_right": "E",
+    "gripper_close": "C",
+    "gripper_open": "V",
+    "emergency_stop": "Space",
+    "mode_switch": "Tab",
+    "reset": "R",
+    "task_menu": "T",
+    "up": "ArrowUp",
+    "down": "ArrowDown",
+    "left": "ArrowLeft",
+    "right": "ArrowRight",
+    "joint1_increase": "Y",
+    "joint1_decrease": "U"
+  },
+  "adm_mode": {
+    "camera_pan": "Mouse_Middle_Drag",
+    "camera_rotate": "Mouse_Right_Drag",
+    "camera_zoom": "Mouse_Wheel",
+    "move_command": "M",
+    "pick_command": "P",
+    "place_command": "L",
+    "follow_command": "F",
+    "group_command": "G",
+    "reset_command": "R",
+    "hold_command": "H",
+    "select_all": "Ctrl+A",
+    "nav_up": "ArrowUp",
+    "nav_down": "ArrowDown",
+    "nav_left": "ArrowLeft",
+    "nav_right": "ArrowRight"
+  },
+  "shared": {
+    "view_toggle": "V",
+    "help_overlay": "F12",
+    "shortcuts_panel": "F1",
+    "robot_status": "F2",
+    "system_menu": "F3",
+    "screenshot": "F11"
+  },
+  "mouse": {
+    "sensitivity": 1.0,
+    "min_sensitivity": 0.5,
+    "max_sensitivity": 3.0,
+    "invert_y": false
+  },
+  "polling": {
+    "rate_hz": 120,
+    "keyboard_latency_target_ms": 10,
+    "mouse_latency_target_ms": 15
+  },
+  "profiles": [
+    {
+      "name": "Default",
+      "description": "Standard keybindings"
+    },
+    {
+      "name": "WASD Focus",
+      "description": "WASD-centric controls"
+    },
+    {
+      "name": "Arrow Focus",
+      "description": "Arrow keys-centric controls"
+    },
+    {
+      "name": "Gamepad",
+      "description": "Gamepad/controller support"
+    },
+    {
+      "name": "Custom",
+      "description": "User-defined keybindings"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "materials": {
+    "metal": {
+      "ue5_material": "/Game/Materials/M_Metal_Base",
+      "properties": {
+        "metallic": 0.9,
+        "roughness": 0.4,
+        "specular": 0.5
+      },
+      "color_default": [0.7, 0.7, 0.7, 1.0]
+    },
+    "plastic": {
+      "ue5_material": "/Game/Materials/M_Plastic_Base",
+      "properties": {
+        "metallic": 0.0,
+        "roughness": 0.5,
+        "specular": 0.3
+      },
+      "color_default": [0.8, 0.8, 0.8, 1.0]
+    },
+    "rubber": {
+      "ue5_material": "/Game/Materials/M_Rubber_Base",
+      "properties": {
+        "metallic": 0.0,
+        "roughness": 0.9,
+        "specular": 0.1
+      },
+      "color_default": [0.2, 0.2, 0.2, 1.0]
+    },
+    "glass": {
+      "ue5_material": "/Game/Materials/M_Glass_Base",
+      "properties": {
+        "metallic": 0.0,
+        "roughness": 0.0,
+        "specular": 1.0,
+        "opacity": 0.3
+      },
+      "color_default": [0.9, 0.9, 1.0, 0.3]
+    },
+    "concrete": {
+      "ue5_material": "/Game/Materials/M_Concrete_Base",
+      "properties": {
+        "metallic": 0.0,
+        "roughness": 0.8,
+        "specular": 0.2
+      },
+      "color_default": [0.5, 0.5, 0.5, 1.0]
+    },
+    "default": {
+      "ue5_material": "/Game/Materials/M_Default_Base",
+      "properties": {
+        "metallic": 0.0,
+        "roughness": 0.5,
+        "specular": 0.3
+      },
+      "color_default": [0.7, 0.7, 0.7, 1.0]
+    }
+  },
+  "color_mapping": {
+    "preserve_source_colors": true,
+    "fallback_to_default": true,
+    "apply_gamma_correction": true
+  }
+}

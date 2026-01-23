@@ -1,0 +1,14 @@
+# CoordinateTask.srv
+# Request coordination for a multi-robot task
+
+# Request
+string requesting_robot_id
+string task_type
+string[] required_resources
+uint8 priority
+
+---
+# Response
+bool approved
+string[] conflicting_robots
+string alternative_suggestion

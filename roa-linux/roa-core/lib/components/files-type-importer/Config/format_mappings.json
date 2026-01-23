@@ -1,0 +1,66 @@
+{
+  "formats": {
+    "urdf": {
+      "name": "URDF (Unified Robot Description Format)",
+      "extensions": [".urdf", ".xacro"],
+      "converter": "urdf_converter.URDFConverter",
+      "priority": 1,
+      "description": "ROS standard robot description format"
+    },
+    "stl": {
+      "name": "STL (Stereolithography)",
+      "extensions": [".stl"],
+      "converter": "stl_converter.STLConverter",
+      "priority": 2,
+      "description": "Common 3D printing and CAD format"
+    },
+    "obj": {
+      "name": "Wavefront OBJ",
+      "extensions": [".obj"],
+      "converter": "obj_converter.OBJConverter",
+      "priority": 3,
+      "description": "Universal 3D geometry format with material support"
+    },
+    "fbx": {
+      "name": "FBX (Filmbox)",
+      "extensions": [".fbx"],
+      "converter": "fbx_converter.FBXConverter",
+      "priority": 4,
+      "description": "Autodesk animation and modeling format"
+    },
+    "dae": {
+      "name": "COLLADA (DAE)",
+      "extensions": [".dae"],
+      "converter": "dae_converter.DAEConverter",
+      "priority": 5,
+      "description": "Digital Asset Exchange format"
+    },
+    "step": {
+      "name": "STEP (ISO 10303)",
+      "extensions": [".step", ".stp"],
+      "converter": "step_converter.STEPConverter",
+      "priority": 6,
+      "description": "CAD standard format"
+    },
+    "iges": {
+      "name": "IGES (Initial Graphics Exchange Specification)",
+      "extensions": [".iges", ".igs"],
+      "converter": "iges_converter.IGESConverter",
+      "priority": 7,
+      "description": "Legacy CAD format"
+    },
+    "usd": {
+      "name": "USD (Universal Scene Description)",
+      "extensions": [".usd", ".usda", ".usdc", ".usdz"],
+      "converter": null,
+      "priority": 0,
+      "description": "Pixar's scene description format (native UE5 support)"
+    }
+  },
+  "conversion_settings": {
+    "intermediate_format": "usd",
+    "preserve_hierarchy": true,
+    "auto_scale": true,
+    "validate_output": true
+  }
+}

@@ -1,0 +1,39 @@
+# Safety Level Definitions for ROC
+
+safety_levels:
+  Fragile:
+    description: "For delicate objects and precision work"
+    speed_multiplier: 0.6           # 60% of maximum speed
+    safety_margin: 0.01             # 10mm safety margin
+    collision_sensitivity: "high"   # High sensitivity collision detection
+    auto_stop_distance: 0.05        # meters - Stop distance from obstacles
+    max_acceleration: 0.5           # m/s² - Maximum acceleration
+    max_jerk: 1.0                   # m/s³ - Maximum jerk
+    warning_distance: 0.10          # meters - Distance to show warning
+    
+  Standard:
+    description: "Normal operations, default setting"
+    speed_multiplier: 1.0           # 100% of maximum speed
+    safety_margin: 0.005            # 5mm safety margin
+    collision_sensitivity: "medium" # Medium sensitivity collision detection
+    auto_stop_distance: 0.03        # meters - Stop distance from obstacles
+    max_acceleration: 1.0           # m/s² - Maximum acceleration
+    max_jerk: 2.0                   # m/s³ - Maximum jerk
+    warning_distance: 0.08          # meters - Distance to show warning
+    
+  Robust:
+    description: "Heavy construction, speed priority"
+    speed_multiplier: 1.2           # 120% of maximum speed (if supported)
+    safety_margin: 0.002            # 2mm safety margin
+    collision_sensitivity: "low"    # Low sensitivity collision detection
+    auto_stop_distance: 0.02        # meters - Stop distance from obstacles
+    max_acceleration: 1.5           # m/s² - Maximum acceleration
+    max_jerk: 3.0                   # m/s³ - Maximum jerk
+    warning_distance: 0.05          # meters - Distance to show warning
+
+# Safety override settings
+override:
+  allow_user_override: true         # Allow user to override safety limits
+  require_confirmation: true        # Require confirmation for override
+  override_timeout: 30              # seconds - Override expires after timeout
+  max_override_percentage: 20       # percent - Maximum override above limits

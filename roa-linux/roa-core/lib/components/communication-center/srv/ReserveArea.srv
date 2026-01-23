@@ -1,0 +1,13 @@
+# ReserveArea.srv
+# Reserve a spatial area for robot operation
+
+# Request
+string robot_id
+geometry_msgs/Point center
+geometry_msgs/Vector3 dimensions
+float64 duration  # seconds (0 = indefinite)
+
+---
+# Response
+bool approved
+string message

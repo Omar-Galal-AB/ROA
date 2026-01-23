@@ -1,0 +1,22 @@
+# Files Type Importer - Python Dependencies
+
+# Core dependencies
+pyyaml>=6.0
+numpy>=1.24.0
+
+# 3D file processing
+trimesh>=3.20.0
+
+# USD support (Pixar's Universal Scene Description)
+# Note: Installation may require additional steps depending on platform
+# pxr  # Uncomment when ready to implement actual USD conversion
+
+# Testing
+pytest>=7.3.0
+pytest-cov>=4.0.0
+
+# XML processing (for URDF and DAE)
+lxml>=4.9.0
+
+# Optional: For advanced mesh processing
+# pymeshlab  # Uncomment if needed for mesh repair/optimization

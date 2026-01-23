@@ -1,0 +1,105 @@
+# roa_component_config.yaml
+# ROA Component Configuration
+# Component startup parameters and coordination settings
+
+ue5_connection:
+  # UE5 connection monitoring settings
+  check_on_startup: true  # Check connection during webthread startup
+  required: true  # Abort startup if connection fails
+  host: "localhost"
+  port: 9876
+  max_attempts: 3  # Number of connection attempts
+  retry_delay: 2.0  # Seconds between retry attempts
+  timeout: 5.0  # Connection timeout in seconds
+  
+  # Connection diagnostics
+  verbose_diagnostics: true
+  log_connection_details: true
+
+components:
+  fti:  # Files Type Importer
+    name: "Files Type Importer"
+    enabled: true
+    startup_priority: 1
+    startup_timeout_seconds: 30
+    supported_formats:
+      - urdf
+      - xacro
+      - stl
+      - obj
+      - fbx
+      - dae
+      - step
+      - iges
+      - sdf
+      - usd
+    auto_organize: true
+    preserve_materials: true
+    
+  dimc:  # Dimensions Collector
+    name: "Dimensions Collector"
+    enabled: true
+    startup_priority: 2
+    startup_timeout_seconds: 20
+    update_rate_hz: 60
+    sensor_simulation: true
+    obstacle_detection: true
+    evade_system: true
+    
+  roc:  # Robot Operator Controller
+    name: "Robot Operator Controller"
+    enabled: true
+    startup_priority: 3
+    startup_timeout_seconds: 30
+    control_modes:
+      - rpm  # Real-time Precise Mode
+      - adm  # Advanced Directive Mode
+    safety_modes:
+      - fragile
+      - standard
+      - robust
+    evade_algorithms:
+      - astar
+      - rrt
+    control_loop_rate_hz: 50
+    
+  comc:  # Communication Center
+    name: "Communication Center"
+    enabled: true
+    startup_priority: 4
+    startup_timeout_seconds: 25
+    dds_middleware: "FastDDS"
+    traffic_priority: true
+    multi_robot_coordination: true
+    max_robots: 10
+    
+  webthread_runtime:
+    name: "Webthread Runtime"
+    enabled: true
+    startup_priority: 5
+    startup_timeout_seconds: 15
+    health_check_interval_ms: 500
+    error_recovery: true
+    logging_enabled: true
+    diagnostics_enabled: true
+
+startup:
+  total_timeout_seconds: 60
+  retry_attempts: 3
+  retry_backoff_seconds: [1, 2, 4]
+  failure_tolerance: 2  # Allow up to 2 component failures
+  degraded_mode: true
+  
+validation:
+  latency_test: true
+  latency_target_ms: 20
+  communication_test: true
+  safety_test: true
+  ui_test: true
+
+error_handling:
+  critical_errors_abort: true
+  warning_continue: true
+  log_all_errors: true
+  user_notification: true
+  diagnostic_mode: true

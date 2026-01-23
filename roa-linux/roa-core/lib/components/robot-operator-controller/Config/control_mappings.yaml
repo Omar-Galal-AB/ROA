@@ -1,0 +1,132 @@
+# Control Mappings for ROC Input Controls
+
+# RPM (Role Playing Mode) keyboard/mouse mappings
+rpm_mode:
+  keyboard:
+    # Robot movement
+    movement:
+      forward: 'W'
+      left: 'A'
+      backward: 'S'
+      right: 'D'
+    
+    # Gripper arm control
+    gripper_arm:
+      up: 'Up'
+      down: 'Down'
+      left: 'Left'
+      right: 'Right'
+    
+    # Gripper operations
+    gripper:
+      close: 'C'
+      open: 'V'
+      extend: 'E'
+      retract: 'Q'
+      rotate_left: 'Y'
+      rotate_right: 'U'
+      toggle_tool: 'T'
+    
+    # Quick actions
+    quick_actions:
+      return_home: 'R'
+      emergency_stop: 'Space'
+      switch_robot: 'Tab'
+      cancel_action: 'Esc'
+      focus_camera: 'F'
+      
+    # Robot selection (quick slots)
+    robot_selection:
+      robot_1: '1'
+      robot_2: '2'
+      robot_3: '3'
+      robot_4: '4'
+  
+  mouse:
+    left_click: 'select_target'      # Select object or position
+    right_click: 'gripper_freedom'   # 6-DOF gripper control
+    middle_click: 'pan_camera'       # Pan camera
+    scroll: 'zoom_camera'            # Zoom in/out
+
+# ADM (Auto Driven Mode) keyboard/mouse mappings
+adm_mode:
+  keyboard:
+    # Camera controls
+    camera:
+      forward: 'W'
+      left: 'A'
+      backward: 'S'
+      right: 'D'
+    
+    # Robot selection
+    selection:
+      up: 'Up'
+      down: 'Down'
+      left: 'Left'
+      right: 'Right'
+    
+    # Command shortcuts
+    commands:
+      move: 'M'
+      pick: 'P'
+      place: 'L'
+      follow_path: 'F'
+      form_group: 'G'
+      return_base: 'R'
+      halt: 'H'
+    
+    # Quick actions
+    quick_actions:
+      pause_all: 'Space'
+      switch_robot: 'Tab'
+      cancel_menu: 'Esc'
+      focus_camera: 'F'
+      select_all: 'Ctrl+A'
+    
+    # Formation controls (multi-robot)
+    formation:
+      move_formation: 'Ctrl+M'
+      rotate_formation: 'Ctrl+R'
+      spread_formation: 'Ctrl+S'
+    
+    # Robot selection (quick slots)
+    robot_selection:
+      robot_1: '1'
+      robot_2: '2'
+      robot_3: '3'
+      robot_4: '4'
+  
+  mouse:
+    left_click: 'select_robot'       # Select robot or object
+    right_click: 'command_menu'      # Open command menu
+    middle_click: 'tilt_camera'      # Tilt/pitch camera
+    scroll: 'zoom_camera'            # Zoom in/out
+    shift_drag: 'box_select'         # Box select multiple robots
+    ctrl_click: 'toggle_selection'   # Add/remove from selection
+    alt_click: 'select_type'         # Select all of same type
+
+# Global controls (active in both modes)
+global:
+  keyboard:
+    toggle_ui_overlay: 'F1'
+    toggle_transparency: 'F2'
+    cycle_ui_position: 'F3'
+    toggle_detailed_help: 'F12'
+    switch_mode: 'M'  # Click mode indicator to switch
+  
+  mouse:
+    mode_switch: 'click_mode_indicator'  # Click top-center indicator
+
+# Customization settings
+customization:
+  allow_rebinding: true                # Allow user to customize keys
+  conflict_detection: true             # Warn about conflicting bindings
+  suggest_alternatives: true           # Suggest unused keys
+  max_custom_profiles: 5               # Maximum number of custom profiles
+  
+# Sensitivity settings
+sensitivity:
+  camera_rotation: 1.0                 # Camera rotation speed multiplier
+  zoom_speed: 1.0                      # Zoom speed multiplier
+  pan_sensitivity: 1.0                 # Pan sensitivity multiplier
+  gripper_control_sensitivity: 1.0     # RPM gripper control sensitivity

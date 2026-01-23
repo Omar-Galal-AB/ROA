@@ -1,0 +1,14 @@
+{
+  "update_rate_hz": 60,
+  "coordinate_frame": "world",
+  "measurement_type": "both",
+  "safety_margin_meters": 0.1,
+  "enable_export": true,
+  "export_interval_seconds": 60,
+  "max_robots": 10,
+  "logging": {
+    "enabled": true,
+    "level": "INFO",
+    "file": "dimc.log"
+  }
+}

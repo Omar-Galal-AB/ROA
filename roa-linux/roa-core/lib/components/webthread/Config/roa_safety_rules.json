@@ -1,0 +1,71 @@
+{
+  "safety_rules": {
+    "collision_detection": {
+      "enabled": true,
+      "threshold_distance_cm": 5.0,
+      "auto_stop": true,
+      "warning_distance_cm": 10.0
+    },
+    "speed_limits": {
+      "fragile_mode_max_speed_cm_per_s": 5.0,
+      "standard_mode_max_speed_cm_per_s": 20.0,
+      "robust_mode_max_speed_cm_per_s": 50.0
+    },
+    "force_limits": {
+      "fragile_mode_max_force_n": 10.0,
+      "standard_mode_max_force_n": 50.0,
+      "robust_mode_max_force_n": 200.0
+    },
+    "work_area_boundaries": {
+      "enforce_boundaries": true,
+      "warning_margin_cm": 20.0,
+      "auto_stop_at_boundary": true
+    }
+  },
+  "traffic_priority": {
+    "enabled": true,
+    "rules": [
+      {
+        "priority": 1,
+        "condition": "emergency_stop_active",
+        "action": "stop_all_robots"
+      },
+      {
+        "priority": 2,
+        "condition": "collision_imminent",
+        "action": "stop_conflicting_robots"
+      },
+      {
+        "priority": 3,
+        "condition": "work_area_conflict",
+        "action": "coordinate_movement"
+      },
+      {
+        "priority": 4,
+        "condition": "task_handoff",
+        "action": "synchronize_robots"
+      }
+    ]
+  },
+  "multi_robot_coordination": {
+    "enabled": true,
+    "min_separation_distance_cm": 50.0,
+    "work_area_reservation": true,
+    "task_handoff_enabled": true,
+    "collision_avoidance_algorithm": "predictive",
+    "communication_timeout_ms": 1000
+  },
+  "emergency_procedures": {
+    "emergency_stop_button": "Space",
+    "stop_all_on_emergency": true,
+    "notify_all_robots": true,
+    "log_emergency_events": true,
+    "require_manual_reset": true
+  },
+  "monitoring": {
+    "continuous_monitoring": true,
+    "alert_on_anomaly": true,
+    "log_safety_events": true,
+    "safety_check_interval_ms": 100
+  }
+}

@@ -1,0 +1,49 @@
+# ROC (Robot Operator Controller) Configuration
+
+roc:
+  # Node configuration
+  node_name: "robot_operator_controller"
+  update_rate: 60  # Hz - Control loop frequency
+  
+  # Control configuration
+  control:
+    latency_target: 20  # milliseconds - Target control loop latency
+    max_robots: 8       # Maximum number of robots supported
+    default_mode: "RPM" # Default control mode (RPM or ADM)
+    
+  # Safety configuration
+  safety:
+    default_level: "Standard"      # Default safety level (Fragile/Standard/Robust)
+    emergency_stop_decel: 2.0      # m/s² - Emergency stop deceleration
+    collision_check_rate: 60       # Hz - Collision checking frequency
+    enable_auto_stop: true         # Auto-stop on collision detection
+    boundary_enforcement: true     # Enforce workspace boundaries
+    
+  # Path planning configuration
+  path_planning:
+    algorithm: "A*"                # Path planning algorithm (A* or RRT)
+    max_planning_time: 5.0         # seconds - Maximum time for path planning
+    replanning_rate: 2             # Hz - Re-planning frequency during execution
+    obstacle_padding: 0.05         # meters - Safety padding around obstacles
+    waypoint_tolerance: 0.01       # meters - Distance tolerance for waypoint reached
+    
+  # UI configuration
+  ui:
+    interface_type: "standalone"   # standalone or ue5_widget
+    update_rate: 30                # FPS - UI refresh rate
+    show_overlay: true             # Show keyboard shortcuts overlay
+    overlay_opacity: 0.6           # Overlay transparency (0.0-1.0)
+    
+  # Logging configuration
+  logging:
+    level: "INFO"                  # DEBUG, INFO, WARN, ERROR
+    log_commands: true             # Log all commands
+    log_safety_events: true        # Log safety violations
+    command_history_size: 1000     # Number of commands to keep in history
+    
+  # Performance monitoring
+  performance:
+    monitor_latency: true          # Monitor control loop latency
+    latency_warning_threshold: 30  # milliseconds - Warn if latency exceeds
+    monitor_cpu: true              # Monitor CPU usage
+    cpu_warning_threshold: 80      # percent - Warn if CPU usage exceeds

@@ -1,0 +1,37 @@
+# ROA Observability Requirements
+# ================================
+# Install with: pip install -r requirements.txt
+
+# Core dependencies (always required)
+# None - the package works with stubs if optional deps are missing
+
+# Logging - always available via stdlib
+# (no external dependencies)
+
+# Metrics - Prometheus
+prometheus-client>=0.17.0
+
+# Tracing - OpenTelemetry
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-otlp>=1.20.0
+
+# Optional: Additional OpenTelemetry instrumentations
+opentelemetry-instrumentation-logging>=0.41b0
+opentelemetry-instrumentation-requests>=0.41b0
+
+# MCAP Recording
+mcap>=1.1.0
+
+# Resource monitoring (CPU, memory)
+psutil>=5.9.0
+
+# Optional: Fluent Bit integration (forward protocol)
+# fluent-logger>=0.10.0
+
+# Optional: For async support
+# aiohttp>=3.8.0
+
+# Development dependencies
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0

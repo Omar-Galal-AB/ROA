@@ -1,0 +1,112 @@
+# ROC Command Validation Configuration
+# Defines safety thresholds and validation rules
+
+validation:
+  # Enable/disable validation stages
+  enabled: true
+  check_position_limits: true
+  check_velocity_limits: true
+  check_collision: true
+  check_boundaries: true
+
+# Position limit settings
+position_limits:
+  # Safety margin from physical limits (radians for revolute, meters for prismatic)
+  safety_margin: 0.05
+  
+  # Behavior when limit exceeded
+  on_limit_exceeded:
+    action: "clamp"  # clamp, reject, or warn
+    log_level: "warning"
+    
+  # Per-joint overrides (optional)
+  # joint_overrides:
+  #   gripper_joint:
+  #     safety_margin: 0.01
+
+# Velocity limit settings
+velocity_limits:
+  # Default velocity limit multiplier (1.0 = use joint's max velocity)
+  default_multiplier: 0.9
+  
+  # Reduce velocity when obstacles nearby
+  obstacle_velocity_reduction:
+    enabled: true
+    thresholds:
+      - distance_cm: 100
+        multiplier: 0.8
+      - distance_cm: 50
+        multiplier: 0.5
+      - distance_cm: 25
+        multiplier: 0.2
+      - distance_cm: 10
+        multiplier: 0.0  # Stop
+
+# Collision avoidance
+collision:
+  # Distance thresholds (centimeters)
+  stop_distance: 10.0
+  slow_distance: 50.0
+  warning_distance: 100.0
+  
+  # Behavior
+  on_collision_risk:
+    action: "stop"  # stop, slow, warn
+    send_alert: true
+    
+  # Collision checking rate (Hz)
+  check_rate: 20
+
+# Boundary enforcement
+boundaries:
+  # Default work area (can be overridden per-robot)
+  default_work_area:
+    min_x: -200.0
+    max_x: 200.0
+    min_y: -200.0
+    max_y: 200.0
+    min_z: 0.0
+    max_z: 300.0
+    
+  # Margin from boundary to trigger warning (cm)
+  warning_margin: 20.0
+  
+  # Margin from boundary to stop motion (cm)
+  stop_margin: 5.0
+  
+  # Behavior
+  on_boundary_violation:
+    action: "clamp"
+    send_alert: true
+
+# Emergency stop settings
+emergency_stop:
+  # Conditions that auto-trigger emergency stop
+  auto_triggers:
+    - condition: "obstacle_distance < 5"
+    - condition: "communication_lost > 2000"  # ms
+    - condition: "joint_error > 0.5"  # radians
+    
+  # Recovery requirements
+  recovery:
+    require_explicit_reset: true
+    check_safety_before_reset: true
+
+# Command queue settings
+command_queue:
+  # Maximum pending commands per robot
+  max_pending_commands: 10
+  
+  # Command timeout (ms)
+  command_timeout: 5000
+  
+  # Rate limiting (commands per second)
+  rate_limit: 60
+
+# Logging
+logging:
+  log_approved_commands: false
+  log_rejected_commands: true
+  log_safety_alerts: true
+  log_state_updates: false
+  log_file: "/tmp/roc_validation.log"

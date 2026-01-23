@@ -1,0 +1,27 @@
+# Robot Operator Controller (ROC) - Python Dependencies
+# ROA - Robot Operations & Automation
+
+# Core ROS2 dependencies
+# rclpy>=3.3.0  # ROS2 Python client library (Humble)
+pyyaml>=6.0
+numpy>=1.20.0
+
+# Path planning
+scipy>=1.7.0
+
+# Performance monitoring
+psutil>=5.9.0
+
+# GUI dependencies for standalone Qt app
+PyQt6>=6.4.0
+
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=3.0.0
+pytest-asyncio>=0.18.0
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.950
+
+# Note: rclpy is commented out as it requires ROS2 installation
+# Install ROS2 first, then uncomment the rclpy line

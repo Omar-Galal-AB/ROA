@@ -1,0 +1,97 @@
+{
+  "component": {
+    "name": "FTI",
+    "full_name": "Files Type Importer",
+    "version": "0.1.0",
+    "status": "ready",
+    "startup_order": 1,
+    "dependencies": []
+  },
+  "ros2": {
+    "node_name": "fti_node",
+    "namespace": "/roa/fti",
+    "topics": {
+      "status": {
+        "name": "fti/status",
+        "type": "std_msgs/String",
+        "qos": "default",
+        "description": "Publishes FTI status and supported formats"
+      },
+      "import_command": {
+        "name": "fti/import_command",
+        "type": "std_msgs/String",
+        "qos": "reliable",
+        "description": "Receives import commands (JSON format)"
+      },
+      "import_result": {
+        "name": "fti/import_result",
+        "type": "std_msgs/String",
+        "qos": "reliable",
+        "description": "Publishes import results"
+      }
+    },
+    "services": {
+      "check_status": {
+        "name": "fti/check_status",
+        "type": "std_srvs/Trigger",
+        "description": "Check FTI status and readiness"
+      }
+    }
+  },
+  "webthread_integration": {
+    "startup_timeout": 10,
+    "health_check_interval": 5.0,
+    "ready_signal": "fti/status",
+    "error_recovery": "restart"
+  },
+  "outputs": {
+    "provides_to_dimc": {
+      "model_metadata": {
+        "description": "Robot model hierarchy, parts list, dimensions",
+        "format": "JSON via ROS2 topic",
+        "topic": "fti/model_metadata"
+      }
+    },
+    "provides_to_roc": {
+      "joint_info": {
+        "description": "Joint definitions from URDF for control",
+        "format": "JSON via ROS2 topic",
+        "topic": "fti/joint_definitions"
+      }
+    },
+    "provides_to_ue5": {
+      "content_paths": {
+        "description": "Paths to imported assets in Content Drawer",
+        "format": "String paths",
+        "delivery": "via import_result"
+      }
+    }
+  },
+  "inputs": {
+    "accepts_from_webthread": {
+      "import_commands": {
+        "description": "Commands to import robot models",
+        "format": "JSON",
+        "required_fields": ["file_path", "robot_name", "import_mode"]
+      },
+      "configuration_updates": {
+        "description": "Runtime configuration updates",
+        "format": "JSON"
+      }
+    }
+  },
+  "validation": {
+    "startup_checks": [
+      "Verify format converters available",
+      "Check write permissions for temp directory",
+      "Validate configuration files",
+      "Test import pipeline with sample file"
+    ],
+    "ready_criteria": [
+      "All converters loaded",
+      "ROS2 node initialized",
+      "Status topic publishing",
+      "Command subscription active"
+    ]
+  }
+}

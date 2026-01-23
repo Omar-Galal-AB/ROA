@@ -1,0 +1,71 @@
+{
+  "ui_overlays": {
+    "shortcuts_panel": {
+      "enabled": true,
+      "position": "bottom_right",
+      "draggable": true,
+      "opacity": 0.6,
+      "auto_hide": true,
+      "auto_hide_delay_seconds": 5
+    },
+    "mode_indicator": {
+      "enabled": true,
+      "position": "top_left",
+      "show_color_coding": true,
+      "rpm_color": "#00FF00",
+      "adm_color": "#0099FF"
+    },
+    "robot_status_panel": {
+      "enabled": true,
+      "position": "bottom_left",
+      "show_battery": true,
+      "show_connection": true,
+      "show_task_status": true
+    },
+    "context_help": {
+      "enabled": true,
+      "trigger_key": "F12",
+      "fade_rate_hz": 30,
+      "auto_dismiss_seconds": 10
+    },
+    "emergency_indicator": {
+      "enabled": true,
+      "blink_rate_hz": 2,
+      "color": "#FF0000"
+    },
+    "command_menu": {
+      "enabled": true,
+      "trigger": "right_click",
+      "position": "cursor",
+      "adm_mode_only": true
+    }
+  },
+  "display": {
+    "refresh_rate_hz": 60,
+    "font_size": "medium",
+    "font_sizes": {
+      "small": 12,
+      "medium": 14,
+      "large": 18
+    },
+    "color_scheme": "dark",
+    "color_schemes": ["light", "dark", "high_contrast"],
+    "transparency": 0.6,
+    "transparency_range": {
+      "min": 0.2,
+      "max": 0.9
+    }
+  },
+  "performance": {
+    "toggle_response_time_ms": 30,
+    "menu_open_time_ms": 50,
+    "fade_transition_ms": 200,
+    "update_interval_ms": 16
+  },
+  "notifications": {
+    "enabled": true,
+    "duration_seconds": 5,
+    "position": "top_center",
+    "max_concurrent": 3
+  }
+}

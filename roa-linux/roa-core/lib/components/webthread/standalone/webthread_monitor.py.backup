@@ -1,0 +1,539 @@
+#!/usr/bin/env python3
+"""
+Webthread Standalone Monitoring Application
+ROA - Robot Operations & Automation
+
+A standalone monitoring dashboard for the Webthread component that can run
+independently from UE5 to monitor system health, component status, and logs.
+"""
+
+import sys
+import logging
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QTextEdit, QPushButton, QGroupBox, QGridLayout,
+    QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
+    QSplitter, QTabWidget
+)
+from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QColor
+from datetime import datetime
+import json
+
+# Add parent directory to path for imports
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'python'))
+
+# Import dark theme
+ui_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'ui')
+sys.path.insert(0, ui_path)
+try:
+    from dark_theme import DARK_THEME
+except ImportError:
+    DARK_THEME = ""
+
+try:
+    from webthread_core import WebthreadCore, ComponentHealth
+    from Logging.logger import setup_roa_logger
+    # Optional: ConnectionManager may not exist yet
+    try:
+        from StatusMonitor.connection_manager import ConnectionManager
+    except ImportError:
+        ConnectionManager = None
+except ImportError as e:
+    print(f"Warning: Could not import Webthread modules: {e}")
+    print("Running in standalone mode with mock data")
+    WebthreadCore = None
+    ComponentHealth = None
+
+
+class MonitorThread(QThread):
+    """Background thread for monitoring Webthread"""
+    status_updated = pyqtSignal(dict)
+    
+    def __init__(self, webthread_core):
+        super().__init__()
+        self.webthread_core = webthread_core
+        self.running = True
+    
+    def run(self):
+        """Monitor loop"""
+        while self.running:
+            try:
+                if self.webthread_core:
+                    status = self.webthread_core.get_system_status()
+                    self.status_updated.emit(status)
+            except Exception as e:
+                logging.error(f"Monitor thread error: {e}")
+            
+            self.msleep(500)  # 500ms update rate
+    
+    def stop(self):
+        """Stop the monitoring thread"""
+        self.running = False
+
+
+class WebthreadMonitorUI(QMainWindow):
+    """Main window for Webthread monitoring application"""
+    
+    def __init__(self):
+        super().__init__()
+        self.webthread_core = None
+        self.monitor_thread = None
+        self.init_webthread()
+        self.init_ui()
+        self.start_monitoring()
+    
+    def init_webthread(self):
+        """Initialize Webthread core"""
+        try:
+            self.webthread_core = WebthreadCore()
+            self.webthread_core.start()
+            logging.info("Webthread core initialized successfully")
+        except Exception as e:
+            logging.error(f"Failed to initialize Webthread: {e}")
+            self.webthread_core = None
+    
+    def init_ui(self):
+        """Initialize the user interface"""
+        self.setWindowTitle("ROA Webthread Monitor")
+        self.setGeometry(100, 100, 1200, 800)
+        
+        # Apply dark theme
+        self.setStyleSheet(DARK_THEME)
+        
+        # Central widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        
+        # Main layout
+        main_layout = QVBoxLayout(central_widget)
+        
+        # Header
+        header = self.create_header()
+        main_layout.addWidget(header)
+        
+        # Splitter for main content
+        splitter = QSplitter(Qt.Orientation.Vertical)
+        
+        # Top section: Component status
+        component_group = self.create_component_status_widget()
+        splitter.addWidget(component_group)
+        
+        # Bottom section: Tabs for logs and details
+        tabs = QTabWidget()
+        tabs.addTab(self.create_log_widget(), "System Logs")
+        tabs.addTab(self.create_stats_widget(), "Statistics")
+        tabs.addTab(self.create_connections_widget(), "Connections")
+        splitter.addWidget(tabs)
+        
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 2)
+        
+        main_layout.addWidget(splitter)
+        
+        # Status bar
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage("Webthread Monitor Ready")
+    
+    def create_header(self):
+        """Create header with system info"""
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+        
+        # Title
+        title = QLabel("Webthread System Monitor")
+        title.setObjectName("titleLabel")
+        title_font = QFont()
+        title_font.setPointSize(16)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        header_layout.addWidget(title)
+        
+        header_layout.addStretch()
+        
+        # Status indicator
+        self.status_label = QLabel("● Running")
+        self.status_label.setObjectName("statusActive")
+        header_layout.addWidget(self.status_label)
+        
+        # Uptime
+        self.uptime_label = QLabel("Uptime: 0s")
+        header_layout.addWidget(self.uptime_label)
+        
+        # UE5 Connection Status
+        self.ue5_status_label = QLabel("UE5: Disconnected")
+        self.ue5_status_label.setStyleSheet("color: red; font-weight: bold;")
+        header_layout.addWidget(self.ue5_status_label)
+        
+        # Control buttons
+        self.start_btn = QPushButton("Start")
+        self.start_btn.setObjectName("startButton")
+        self.start_btn.clicked.connect(self.start_webthread)
+        self.start_btn.setEnabled(False)
+        header_layout.addWidget(self.start_btn)
+        
+        self.stop_btn = QPushButton("Stop")
+        self.stop_btn.setObjectName("stopButton")
+        self.stop_btn.clicked.connect(self.stop_webthread)
+        header_layout.addWidget(self.stop_btn)
+        
+        # Add separator
+        header_layout.addSpacing(20)
+        
+        # Bridge Server Controls
+        bridge_label = QLabel("Bridge Server:")
+        header_layout.addWidget(bridge_label)
+        
+        self.bridge_start_btn = QPushButton("Start Bridge")
+        self.bridge_start_btn.setObjectName("bridgeStartButton")
+        self.bridge_start_btn.clicked.connect(self.start_bridge)
+        header_layout.addWidget(self.bridge_start_btn)
+        
+        self.bridge_stop_btn = QPushButton("Stop Bridge")
+        self.bridge_stop_btn.setObjectName("bridgeStopButton")
+        self.bridge_stop_btn.clicked.connect(self.stop_bridge)
+        header_layout.addWidget(self.bridge_stop_btn)
+        
+        self.bridge_status_label = QLabel("⚫ Unknown")
+        header_layout.addWidget(self.bridge_status_label)
+        
+        return header_widget
+    
+    def create_component_status_widget(self):
+        """Create component status table"""
+        group = QGroupBox("Component Health Status")
+        layout = QVBoxLayout(group)
+        
+        self.component_table = QTableWidget()
+        self.component_table.setColumnCount(5)
+        self.component_table.setHorizontalHeaderLabels([
+            "Component", "Status", "Response Time (ms)", "Errors", "Last Check"
+        ])
+        self.component_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        
+        layout.addWidget(self.component_table)
+        
+        return group
+    
+    def create_log_widget(self):
+        """Create log viewer widget"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        # Controls
+        controls = QHBoxLayout()
+        clear_btn = QPushButton("Clear Logs")
+        clear_btn.clicked.connect(lambda: self.log_text.clear())
+        controls.addWidget(clear_btn)
+        controls.addStretch()
+        
+        layout.addLayout(controls)
+        
+        # Log text area
+        self.log_text = QTextEdit()
+        self.log_text.setReadOnly(True)
+        self.log_text.setFont(QFont("Courier", 9))
+        layout.addWidget(self.log_text)
+        
+        return widget
+    
+    def create_stats_widget(self):
+        """Create statistics widget"""
+        widget = QWidget()
+        layout = QGridLayout(widget)
+        
+        # Statistics labels
+        stats = [
+            ("Total Components:", "total_components"),
+            ("Healthy:", "healthy_components"),
+            ("Degraded:", "degraded_components"),
+            ("Failed:", "failed_components"),
+            ("Total Errors:", "error_count"),
+            ("Total Warnings:", "warning_count"),
+        ]
+        
+        self.stat_labels = {}
+        for i, (label, key) in enumerate(stats):
+            layout.addWidget(QLabel(label), i, 0)
+            value_label = QLabel("0")
+            value_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+            layout.addWidget(value_label, i, 1)
+            self.stat_labels[key] = value_label
+        
+        layout.setRowStretch(len(stats), 1)
+        
+        return widget
+    
+    def create_connections_widget(self):
+        """Create connections status widget"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        self.conn_table = QTableWidget()
+        self.conn_table.setColumnCount(3)
+        self.conn_table.setHorizontalHeaderLabels(["Connection", "Status", "Details"])
+        self.conn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        
+        # Initialize connections (will be updated in update_connections)
+        self.conn_table.setRowCount(3)
+        
+        layout.addWidget(self.conn_table)
+        
+        # Reconnect button
+        reconnect_btn = QPushButton("Reconnect UE5")
+        reconnect_btn.clicked.connect(self.reconnect_ue5)
+        layout.addWidget(reconnect_btn)
+        
+        return widget
+    
+    def start_monitoring(self):
+        """Start the monitoring thread"""
+        if self.webthread_core and not self.monitor_thread:
+            self.monitor_thread = MonitorThread(self.webthread_core)
+            self.monitor_thread.status_updated.connect(self.update_status)
+            self.monitor_thread.start()
+            
+            # Update timer for UI
+            self.ui_timer = QTimer()
+            self.ui_timer.timeout.connect(self.update_ui)
+            self.ui_timer.start(1000)  # Update every second
+        
+        # Bridge status timer
+        self.bridge_timer = QTimer()
+        self.bridge_timer.timeout.connect(self.update_bridge_status)
+        self.bridge_timer.start(2000)  # Update every 2 seconds
+        self.update_bridge_status()  # Initial check
+    
+    def update_status(self, status):
+        """Update display with new status"""
+        if not status:
+            return
+        
+        # Update statistics
+        for key, label in self.stat_labels.items():
+            if key in status:
+                label.setText(str(status[key]))
+        
+        # Update uptime
+        uptime = int(status.get('uptime', 0))
+        hours = uptime // 3600
+        minutes = (uptime % 3600) // 60
+        seconds = uptime % 60
+        self.uptime_label.setText(f"Uptime: {hours:02d}:{minutes:02d}:{seconds:02d}")
+        
+        # Update UE5 connection status
+        self.update_ue5_status()
+        
+        # Update connections table
+        self.update_connections()
+        
+        # Update component table
+        components = status.get('components', {})
+        self.component_table.setRowCount(len(components))
+        
+        for i, (name, comp_status) in enumerate(components.items()):
+            self.component_table.setItem(i, 0, QTableWidgetItem(name))
+            
+            # Status with color
+            status_text = comp_status.get('status', 'unknown')
+            status_item = QTableWidgetItem(status_text.upper())
+            
+            if status_text == 'healthy':
+                status_item.setForeground(QColor("green"))
+            elif status_text == 'degraded':
+                status_item.setForeground(QColor("orange"))
+            elif status_text == 'failed':
+                status_item.setForeground(QColor("red"))
+            
+            self.component_table.setItem(i, 1, status_item)
+            
+            # Other fields
+            self.component_table.setItem(i, 2, QTableWidgetItem(
+                f"{comp_status.get('response_time', 0):.2f}"
+            ))
+            self.component_table.setItem(i, 3, QTableWidgetItem(
+                str(comp_status.get('error_count', 0))
+            ))
+            self.component_table.setItem(i, 4, QTableWidgetItem(
+                datetime.now().strftime("%H:%M:%S")
+            ))
+    
+    def update_ue5_status(self):
+        """Update UE5 connection status indicator"""
+        if self.webthread_core and self.webthread_core.is_ue5_connected():
+            self.ue5_status_label.setText("UE5: Connected")
+            self.ue5_status_label.setStyleSheet("color: #00ff00; font-weight: bold;")
+        else:
+            self.ue5_status_label.setText("UE5: Disconnected")
+            self.ue5_status_label.setStyleSheet("color: red; font-weight: bold;")
+    
+    def update_connections(self):
+        """Update connections table"""
+        connections = [
+            ("ROS2", "Not Connected", "Optional"),
+            ("UE5", self.get_ue5_status_text(), self.get_ue5_details()),
+            ("Gazebo", "Not Connected", "Optional"),
+        ]
+        
+        for i, (name, status, details) in enumerate(connections):
+            self.conn_table.setItem(i, 0, QTableWidgetItem(name))
+            
+            status_item = QTableWidgetItem("●")
+            if "Connected" in status:
+                status_item.setForeground(QColor("green"))
+            else:
+                status_item.setForeground(QColor("red"))
+            self.conn_table.setItem(i, 1, status_item)
+            
+            details_item = QTableWidgetItem(f"{status} - {details}")
+            self.conn_table.setItem(i, 2, details_item)
+    
+    def get_ue5_status_text(self) -> str:
+        """Get UE5 connection status text"""
+        if self.webthread_core and self.webthread_core.is_ue5_connected():
+            return "Connected"
+        return "Not Connected"
+    
+    def get_ue5_details(self) -> str:
+        """Get UE5 connection details"""
+        if self.webthread_core and self.webthread_core.ue5_connector:
+            host = self.webthread_core.ue5_host
+            port = self.webthread_core.ue5_port
+            return f"{host}:{port}"
+        return "localhost:9876"
+    
+    def reconnect_ue5(self):
+        """Reconnect to UE5"""
+        if self.webthread_core:
+            self.add_log("Attempting to reconnect to UE5...")
+            if self.webthread_core.reconnect_ue5():
+                self.add_log("Successfully reconnected to UE5", "SUCCESS")
+                self.update_ue5_status()
+                self.update_connections()
+            else:
+                self.add_log("Failed to reconnect to UE5", "ERROR")
+    
+    def update_ui(self):
+        """Periodic UI updates"""
+        # Could add additional UI updates here
+        pass
+    
+    def add_log(self, message, level="INFO"):
+        """Add a log message"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_line = f"[{timestamp}] [{level}] {message}"
+        self.log_text.append(log_line)
+    
+    def start_webthread(self):
+        """Start Webthread"""
+        if not self.webthread_core:
+            self.init_webthread()
+        
+        if self.webthread_core and not self.webthread_core.monitoring_active:
+            self.webthread_core.start()
+            self.start_monitoring()
+            self.status_label.setText("● Running")
+            self.status_label.setStyleSheet("color: green; font-weight: bold;")
+            self.start_btn.setEnabled(False)
+            self.stop_btn.setEnabled(True)
+            self.add_log("Webthread started")
+    
+    def stop_webthread(self):
+        """Stop Webthread"""
+        if self.webthread_core and self.webthread_core.monitoring_active:
+            self.webthread_core.stop()
+            self.status_label.setText("● Stopped")
+            self.status_label.setStyleSheet("color: red; font-weight: bold;")
+            self.start_btn.setEnabled(True)
+            self.stop_btn.setEnabled(False)
+            self.add_log("Webthread stopped")
+    
+    def start_bridge(self):
+        """Start the rosbridge server"""
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["/home/myws/roa/roa_linux/roa-core/lib/start_bridge.sh"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                self.bridge_status_label.setText("🟢 Running")
+                self.bridge_status_label.setStyleSheet("color: green; font-weight: bold;")
+                self.add_log("Bridge server started on port 9090")
+            else:
+                self.add_log(f"Bridge start failed: {result.stderr}", "ERROR")
+        except Exception as e:
+            self.add_log(f"Failed to start bridge: {e}", "ERROR")
+        self.update_bridge_status()
+    
+    def stop_bridge(self):
+        """Stop the rosbridge server"""
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["/home/myws/roa/roa_linux/roa-core/lib/stop_bridge.sh"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            self.bridge_status_label.setText("⚫ Stopped")
+            self.bridge_status_label.setStyleSheet("color: gray; font-weight: bold;")
+            self.add_log("Bridge server stopped")
+        except Exception as e:
+            self.add_log(f"Failed to stop bridge: {e}", "ERROR")
+        self.update_bridge_status()
+    
+    def update_bridge_status(self):
+        """Update bridge server status indicator"""
+        import subprocess
+        try:
+            # Check if bridge is running
+            result = subprocess.run(
+                ["pgrep", "-f", "roa_bridge_server.py"],
+                capture_output=True
+            )
+            if result.returncode == 0:
+                self.bridge_status_label.setText("🟢 Running")
+                self.bridge_status_label.setStyleSheet("color: green; font-weight: bold;")
+            else:
+                self.bridge_status_label.setText("⚫ Stopped")
+                self.bridge_status_label.setStyleSheet("color: gray; font-weight: bold;")
+        except:
+            self.bridge_status_label.setText("⚠️ Unknown")
+            self.bridge_status_label.setStyleSheet("color: orange; font-weight: bold;")
+    
+    def closeEvent(self, event):
+        """Handle window close"""
+        if self.monitor_thread:
+            self.monitor_thread.stop()
+            self.monitor_thread.wait()
+        
+        if self.webthread_core:
+            self.webthread_core.shutdown()
+        
+        event.accept()
+
+
+def main():
+    """Main entry point"""
+    # Setup logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    app = QApplication(sys.argv)
+    app.setApplicationName("ROA Webthread Monitor")
+    
+    window = WebthreadMonitorUI()
+    window.show()
+    
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()

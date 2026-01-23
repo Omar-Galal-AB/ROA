@@ -1,0 +1,25 @@
+# Webthread Component - Python Dependencies
+# ROA - Robot Operations & Automation
+
+# Core dependencies
+# rclpy>=3.3.0  # ROS2 Python client library (Humble)
+pyyaml>=6.0
+
+# GUI dependencies for standalone app
+PyQt6>=6.4.0
+
+# Optional dependencies for different features
+# websockets>=10.0  # For UE5 WebSocket communication
+# psutil>=5.9.0     # For system monitoring
+# watchdog>=2.1.0   # For config file watching
+
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=3.0.0
+pytest-asyncio>=0.18.0
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.950
+
+# Note: rclpy is commented out as it requires ROS2 installation
+# Install ROS2 first, then uncomment the rclpy line

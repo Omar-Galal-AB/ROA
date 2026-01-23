@@ -1,0 +1,163 @@
+# ROC UI Widget Configuration
+# Defines widget appearance and behavior for UE5
+
+widget:
+  # Main control panel
+  control_panel:
+    title: "ROA Robot Controller"
+    width: 400
+    height: 600
+    position:
+      anchor: "top_right"
+      offset_x: -20
+      offset_y: 20
+    opacity: 0.95
+    
+    # Visibility settings
+    show_on_start: true
+    toggle_key: "F1"
+    
+  # Robot selector dropdown
+  robot_selector:
+    width: 200
+    max_visible_items: 5
+    show_joint_count: true
+    show_status_icon: true
+    
+  # Mode selector (RPM/ADM toggle)
+  mode_selector:
+    style: "toggle_button"  # toggle_button, radio, dropdown
+    show_icons: true
+    rpm_label: "Manual (RPM)"
+    adm_label: "Auto (ADM)"
+    rpm_color: "#4CAF50"  # Green
+    adm_color: "#2196F3"  # Blue
+
+# Joint slider widget
+joint_slider:
+  height: 50
+  slider_style: "continuous"  # continuous, stepped
+  
+  # Value display
+  show_current_value: true
+  show_target_value: true
+  show_limits: true
+  decimal_places: 3
+  
+  # Units display
+  show_units: true
+  revolute_unit: "rad"
+  prismatic_unit: "m"
+  
+  # Colors
+  colors:
+    normal: "#FFFFFF"
+    at_limit: "#FFC107"  # Yellow warning
+    error: "#F44336"     # Red error
+    target_indicator: "#2196F3"  # Blue
+    
+  # Behavior
+  drag_sensitivity: 1.0
+  keyboard_step: 0.1  # radians or meters per key press
+  
+  # Visual feedback
+  show_limit_markers: true
+  show_velocity_bar: false
+  highlight_on_hover: true
+
+# Gripper controls
+gripper:
+  style: "buttons"  # buttons, slider, toggle
+  open_label: "Open"
+  close_label: "Close"
+  show_position: true
+  
+# Speed control
+speed_control:
+  show: true
+  min_multiplier: 0.1
+  max_multiplier: 2.0
+  default_multiplier: 1.0
+  step: 0.1
+
+# Emergency stop button
+emergency_stop:
+  size: 80
+  position: "bottom_center"
+  color: "#FF0000"
+  pulse_animation: true
+  require_confirmation: false
+  label: "E-STOP"
+  
+# Status display
+status_display:
+  show_mode: true
+  show_robot_name: true
+  show_joint_count: true
+  show_obstacle_distance: true
+  show_safety_status: true
+  
+  # Status colors
+  status_colors:
+    ready: "#4CAF50"      # Green
+    moving: "#2196F3"     # Blue
+    warning: "#FFC107"    # Yellow
+    error: "#F44336"      # Red
+    stopped: "#9E9E9E"    # Gray
+
+# Input settings
+input:
+  # Keyboard controls for RPM mode
+  keyboard:
+    enabled: true
+    
+    # Joint selection
+    next_joint: ["E", "Tab"]
+    prev_joint: ["Q", "Shift+Tab"]
+    
+    # Joint movement
+    move_positive: ["W", "Up"]
+    move_negative: ["S", "Down"]
+    
+    # Speed modifier
+    speed_boost: ["Shift"]  # Hold for faster movement
+    speed_slow: ["Ctrl"]    # Hold for slower movement
+    
+    # Gripper
+    gripper_toggle: ["G"]
+    gripper_open: ["O"]
+    gripper_close: ["C"]
+    
+    # Mode
+    mode_toggle: ["M"]
+    
+    # Safety
+    emergency_stop: ["Space", "Escape"]
+    
+  # Mouse controls
+  mouse:
+    enabled: true
+    scroll_joint_selection: true
+    drag_slider: true
+    
+  # Gamepad controls (future)
+  gamepad:
+    enabled: false
+    
+# Animation settings
+animations:
+  enabled: true
+  duration_ms: 200
+  easing: "ease_out"
+  
+  # Specific animations
+  slider_movement: true
+  mode_transition: true
+  alert_pulse: true
+  
+# Accessibility
+accessibility:
+  high_contrast_mode: false
+  large_text_mode: false
+  keyboard_only_mode: false
+  screen_reader_labels: true

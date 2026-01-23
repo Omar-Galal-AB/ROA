@@ -1,0 +1,14 @@
+# Python dependencies for DIMC (Dimensions Collector)
+
+# Core dependencies
+numpy>=1.24.0        # Mathematical operations
+pyyaml>=6.0          # YAML configuration parsing
+
+# ROS2 dependencies (install via apt for ROS2 Humble)
+# rclpy - ROS2 Python client library
+# geometry_msgs - ROS2 geometry message types
+# rosbag2_py - ROS bag recording
+
+# Testing dependencies
+pytest>=7.3.0        # Unit testing framework
+pytest-cov>=4.0.0    # Test coverage

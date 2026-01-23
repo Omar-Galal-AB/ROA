@@ -1,0 +1,32 @@
+{
+  "import": {
+    "create_collision": true,
+    "combine_meshes": false,
+    "scale_factor": 1.0,
+    "auto_organize": true,
+    "generate_lods": false,
+    "import_materials": true,
+    "import_textures": true
+  },
+  "organization": {
+    "base_path": "/Game/Robots",
+    "folder_structure": {
+      "parts": "Parts",
+      "assembly": "Assembly",
+      "materials": "Materials",
+      "textures": "Textures"
+    }
+  },
+  "optimization": {
+    "merge_vertices": true,
+    "remove_degenerates": true,
+    "optimize_meshes": true,
+    "max_vertices_per_mesh": 65536
+  },
+  "validation": {
+    "check_normals": true,
+    "check_uvs": false,
+    "warn_on_large_meshes": true,
+    "max_mesh_size_mb": 100
+  }
+}

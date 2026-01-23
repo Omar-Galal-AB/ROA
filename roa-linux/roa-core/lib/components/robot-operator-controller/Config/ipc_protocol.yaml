@@ -1,0 +1,277 @@
+# ROC IPC Protocol Configuration
+# Defines message formats for UE5 <-> Linux communication
+
+ipc:
+  # Connection settings (uses existing ROA dual-port bridge)
+  receive_port: 9876  # UE5 -> Linux
+  send_port: 9877     # Linux -> UE5
+  ue5_host: "localhost"  # Or Windows IP when cross-platform
+  
+  # Timeouts
+  connection_timeout_ms: 5000
+  message_timeout_ms: 1000
+  heartbeat_interval_ms: 1000
+  
+  # Buffer sizes
+  receive_buffer_bytes: 8192
+  send_buffer_bytes: 8192
+
+# Message type definitions
+message_types:
+  # ==================== UE5 -> Linux ====================
+  
+  joint_command_request:
+    description: "Request to move joint(s) - requires safety validation"
+    fields:
+      - name: type
+        type: string
+        value: "joint_command_request"
+      - name: robot_id
+        type: string
+        required: true
+      - name: commands
+        type: array
+        items:
+          - name: joint_name
+            type: string
+          - name: target_position
+            type: float
+            unit: "radians (revolute) or meters (prismatic)"
+          - name: velocity_limit
+            type: float
+            default: 0.0
+            description: "0 = use default"
+          - name: command_id
+            type: string
+            description: "Unique ID for tracking"
+      - name: source
+        type: string
+        enum: ["rpm", "adm", "external"]
+      - name: timestamp
+        type: float
+        
+  emergency_stop:
+    description: "Immediate halt of all robot motion"
+    fields:
+      - name: type
+        type: string
+        value: "emergency_stop"
+      - name: robot_id
+        type: string
+        required: true
+        description: "Use 'all' for all robots"
+      - name: reason
+        type: string
+        enum: ["user_requested", "collision_imminent", "limit_exceeded", "system_error"]
+      - name: timestamp
+        type: float
+        
+  mode_change:
+    description: "Request to change control mode"
+    fields:
+      - name: type
+        type: string
+        value: "mode_change"
+      - name: robot_id
+        type: string
+      - name: new_mode
+        type: string
+        enum: ["rpm", "adm"]
+      - name: timestamp
+        type: float
+        
+  robot_registered:
+    description: "Notify Linux that robot was registered in UE5"
+    fields:
+      - name: type
+        type: string
+        value: "robot_registered"
+      - name: robot_id
+        type: string
+      - name: robot_name
+        type: string
+      - name: joint_count
+        type: integer
+      - name: timestamp
+        type: float
+        
+  heartbeat:
+    description: "Keep-alive signal"
+    fields:
+      - name: type
+        type: string
+        value: "heartbeat"
+      - name: source
+        type: string
+        value: "ue5"
+      - name: timestamp
+        type: float
+        
+  # ==================== Linux -> UE5 ====================
+  
+  command_approved:
+    description: "Joint command approved by safety system"
+    fields:
+      - name: type
+        type: string
+        value: "command_approved"
+      - name: robot_id
+        type: string
+      - name: commands
+        type: array
+        items:
+          - name: command_id
+            type: string
+          - name: joint_name
+            type: string
+          - name: target_position
+            type: float
+            description: "May be modified from original"
+          - name: velocity_limit
+            type: float
+          - name: approved
+            type: boolean
+            value: true
+      - name: timestamp
+        type: float
+        
+  command_rejected:
+    description: "Joint command rejected by safety system"
+    fields:
+      - name: type
+        type: string
+        value: "command_rejected"
+      - name: robot_id
+        type: string
+      - name: command_id
+        type: string
+      - name: joint_name
+        type: string
+      - name: reason
+        type: string
+        enum:
+          - "exceeds_position_limit"
+          - "exceeds_velocity_limit"
+          - "collision_risk"
+          - "emergency_stop_active"
+          - "unknown_joint"
+          - "unknown_robot"
+      - name: timestamp
+        type: float
+        
+  safety_alert:
+    description: "Safety warning or notification"
+    fields:
+      - name: type
+        type: string
+        value: "safety_alert"
+      - name: robot_id
+        type: string
+      - name: alert_type
+        type: string
+        enum:
+          - "obstacle_warning"
+          - "limit_approaching"
+          - "velocity_clamped"
+          - "boundary_warning"
+          - "emergency_stop_triggered"
+          - "emergency_stop_cleared"
+      - name: severity
+        type: string
+        enum: ["info", "warning", "critical"]
+      - name: message
+        type: string
+      - name: timestamp
+        type: float
+        
+  state_update:
+    description: "Periodic state update from Linux to UE5"
+    fields:
+      - name: type
+        type: string
+        value: "state_update"
+      - name: robot_id
+        type: string
+      - name: mode
+        type: string
+        enum: ["rpm", "adm"]
+      - name: status
+        type: string
+        enum: ["ready", "moving", "emergency_stopped", "error"]
+      - name: safety_status
+        type: object
+        fields:
+          - name: all_limits_ok
+            type: boolean
+          - name: obstacle_distance
+            type: float
+          - name: within_bounds
+            type: boolean
+      - name: timestamp
+        type: float
+        
+  heartbeat_ack:
+    description: "Acknowledge heartbeat"
+    fields:
+      - name: type
+        type: string
+        value: "heartbeat_ack"
+      - name: source
+        type: string
+        value: "linux"
+      - name: timestamp
+        type: float
+
+# Example messages
+examples:
+  joint_command_request: |
+    {
+      "type": "joint_command_request",
+      "robot_id": "robot_0",
+      "commands": [
+        {
+          "joint_name": "shoulder_joint",
+          "target_position": 1.5708,
+          "velocity_limit": 1.0,
+          "command_id": "cmd_001"
+        }
+      ],
+      "source": "rpm",
+      "timestamp": 1705167200.123
+    }
+    
+  command_approved: |
+    {
+      "type": "command_approved",
+      "robot_id": "robot_0",
+      "commands": [
+        {
+          "command_id": "cmd_001",
+          "joint_name": "shoulder_joint",
+          "target_position": 1.5708,
+          "velocity_limit": 1.0,
+          "approved": true
+        }
+      ],
+      "timestamp": 1705167200.125
+    }
+    
+  command_rejected: |
+    {
+      "type": "command_rejected",
+      "robot_id": "robot_0",
+      "command_id": "cmd_002",
+      "joint_name": "elbow_joint",
+      "reason": "exceeds_position_limit",
+      "timestamp": 1705167200.126
+    }
+    
+  safety_alert: |
+    {
+      "type": "safety_alert",
+      "robot_id": "robot_0",
+      "alert_type": "obstacle_warning",
+      "severity": "warning",
+      "message": "Obstacle detected at 45cm",
+      "timestamp": 1705167200.200
+    }
