@@ -5,7 +5,7 @@ Status monitor UI
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class MonitorUI:
@@ -19,7 +19,7 @@ class MonitorUI:
     def display_status(self, status_data: Dict[str, Any]):
         """
         Display system status
-        
+
         Args:
             status_data: Status information to display
         """

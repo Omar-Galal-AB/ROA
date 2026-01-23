@@ -2,15 +2,16 @@
 Tests for UE5Bridge module
 """
 
-import pytest
-import sys
 import os
+import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'python'))
+import pytest
 
-from UE5Bridge.ue5_connector import UE5Connector
-from UE5Bridge.physics_configurator import PhysicsConfigurator
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "python"))
+
 from UE5Bridge.input_initializer import InputInitializer
+from UE5Bridge.physics_configurator import PhysicsConfigurator
+from UE5Bridge.ue5_connector import UE5Connector
 from UE5Bridge.ui_initializer import UIInitializer
 
 
@@ -42,7 +43,7 @@ class TestUE5Connector:
         """Test sending command to UE5"""
         connector = UE5Connector()
         connector.connect()
-        
+
         result = connector.send_command("test_command", {"param": "value"})
         # Will return False in test environment since actual connection doesn't exist
         # but validates the logic
@@ -61,7 +62,7 @@ class TestPhysicsConfigurator:
         """Test loading physics configuration"""
         connector = UE5Connector()
         configurator = PhysicsConfigurator(connector)
-        
+
         # Test with default config file
         result = configurator.load_config()
         # Should handle missing file gracefully
@@ -80,7 +81,7 @@ class TestInputInitializer:
         """Test loading input configuration"""
         connector = UE5Connector()
         initializer = InputInitializer(connector)
-        
+
         result = initializer.load_config()
         # Should handle missing file gracefully
 
@@ -98,10 +99,10 @@ class TestUIInitializer:
         """Test loading UI configuration"""
         connector = UE5Connector()
         initializer = UIInitializer(connector)
-        
+
         result = initializer.load_config()
         # Should handle missing file gracefully
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

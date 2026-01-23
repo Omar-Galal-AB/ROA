@@ -10,16 +10,17 @@ import tempfile
 from pathlib import Path
 
 # Add the source directory to path
-sys.path.insert(0, str(Path(__file__).parent / 'src' / 'python'))
+sys.path.insert(0, str(Path(__file__).parent / "src" / "python"))
+
 
 def test_stl_converter():
     """Test STL to USD conversion with a simple STL file."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST: STL Converter")
-    print("="*60)
-    
+    print("=" * 60)
+
     from Converters.stl_converter import STLConverter
-    
+
     # Create a simple ASCII STL file
     stl_content = """solid test
   facet normal 0 0 1
@@ -37,28 +38,28 @@ def test_stl_converter():
     endloop
   endfacet
 endsolid test"""
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = Path(tmpdir) / "test.stl"
         output_path = Path(tmpdir) / "test.usda"
-        
+
         # Write test STL
         input_path.write_text(stl_content)
         print(f"  Created test STL: {input_path}")
-        
+
         # Convert
         converter = STLConverter()
         result = converter.convert(str(input_path), str(output_path), "test_mesh")
-        
+
         # Check result
         if result.success:
             if output_path.exists():
                 file_size = output_path.stat().st_size
                 print(f"  ✅ SUCCESS: Created {output_path.name} ({file_size} bytes)")
-                
+
                 # Print first 20 lines of USD file
                 content = output_path.read_text()
-                lines = content.split('\n')[:20]
+                lines = content.split("\n")[:20]
                 print("  USD content (first 20 lines):")
                 for line in lines:
                     print(f"    {line}")
@@ -70,14 +71,15 @@ endsolid test"""
             print(f"  ❌ FAILED: {result.error_message}")
             return False
 
+
 def test_obj_converter():
     """Test OBJ to USD conversion with a simple OBJ file."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST: OBJ Converter")
-    print("="*60)
-    
+    print("=" * 60)
+
     from Converters.obj_converter import OBJConverter
-    
+
     # Create a simple OBJ file (a triangle)
     obj_content = """# Simple triangle
 v 0 0 0
@@ -86,19 +88,19 @@ v 0.5 1 0
 vn 0 0 1
 f 1//1 2//1 3//1
 """
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = Path(tmpdir) / "test.obj"
         output_path = Path(tmpdir) / "test.usda"
-        
+
         # Write test OBJ
         input_path.write_text(obj_content)
         print(f"  Created test OBJ: {input_path}")
-        
+
         # Convert
         converter = OBJConverter()
         result = converter.convert(str(input_path), str(output_path), "test_obj")
-        
+
         # Check result
         if result.success:
             if output_path.exists():
@@ -114,14 +116,15 @@ f 1//1 2//1 3//1
             print(f"  ❌ FAILED: {result.error_message}")
             return False
 
+
 def test_urdf_converter():
     """Test URDF to USD conversion with a simple URDF file."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST: URDF Converter")
-    print("="*60)
-    
+    print("=" * 60)
+
     from Converters.urdf_converter import URDFConverter
-    
+
     # Create a simple URDF file
     urdf_content = """<?xml version="1.0"?>
 <robot name="test_robot">
@@ -184,19 +187,19 @@ def test_urdf_converter():
   </joint>
 </robot>
 """
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = Path(tmpdir) / "test_robot.urdf"
         output_path = Path(tmpdir) / "test_robot.usda"
-        
+
         # Write test URDF
         input_path.write_text(urdf_content)
         print(f"  Created test URDF: {input_path}")
-        
+
         # Convert
         converter = URDFConverter()
         result = converter.convert(str(input_path), str(output_path), "test_robot")
-        
+
         # Check result
         if result.success:
             if output_path.exists():
@@ -206,10 +209,10 @@ def test_urdf_converter():
                 print(f"  Materials: {result.materials}")
                 if result.warnings:
                     print(f"  Warnings: {result.warnings}")
-                
+
                 # Print first 30 lines of USD file
                 content = output_path.read_text()
-                lines = content.split('\n')[:30]
+                lines = content.split("\n")[:30]
                 print("  USD content (first 30 lines):")
                 for line in lines:
                     print(f"    {line}")
@@ -223,52 +226,55 @@ def test_urdf_converter():
 
 
 def main():
-    print("="*60)
+    print("=" * 60)
     print("FTI CONVERTER TEST SUITE")
-    print("="*60)
+    print("=" * 60)
     print("Testing that converters produce actual USD output files")
-    
+
     results = {}
-    
+
     # Run tests
     try:
-        results['STL'] = test_stl_converter()
+        results["STL"] = test_stl_converter()
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         import traceback
+
         traceback.print_exc()
-        results['STL'] = False
-    
+        results["STL"] = False
+
     try:
-        results['OBJ'] = test_obj_converter()
+        results["OBJ"] = test_obj_converter()
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         import traceback
+
         traceback.print_exc()
-        results['OBJ'] = False
-    
+        results["OBJ"] = False
+
     try:
-        results['URDF'] = test_urdf_converter()
+        results["URDF"] = test_urdf_converter()
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         import traceback
+
         traceback.print_exc()
-        results['URDF'] = False
-    
+        results["URDF"] = False
+
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST SUMMARY")
-    print("="*60)
-    
+    print("=" * 60)
+
     passed = sum(1 for v in results.values() if v)
     total = len(results)
-    
+
     for name, success in results.items():
         status = "✅ PASS" if success else "❌ FAIL"
         print(f"  {name} Converter: {status}")
-    
+
     print(f"\n  Total: {passed}/{total} tests passed")
-    
+
     if passed == total:
         print("\n  🎉 ALL TESTS PASSED - Converters produce real USD output!")
         return 0

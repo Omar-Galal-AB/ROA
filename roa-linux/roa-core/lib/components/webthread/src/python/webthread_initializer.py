@@ -7,20 +7,22 @@ This is the Python counterpart to the C++ WebthreadInitializer,
 providing initialization functionality accessible from Python.
 """
 
-import time
-import logging
-import platform
-import os
 import json
-import yaml
-from typing import Dict, List, Optional, Tuple
-from enum import Enum
+import logging
+import os
+import platform
+import time
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
+import yaml
 
 
 class InitPhase(Enum):
     """Initialization phase status"""
+
     NOT_STARTED = "not_started"
     PRE_CHECKS = "pre_checks"
     ENVIRONMENT_SETUP = "environment_setup"
@@ -32,6 +34,7 @@ class InitPhase(Enum):
 
 class ComponentStatus(Enum):
     """Component startup status"""
+
     NOT_STARTED = "not_started"
     STARTING = "starting"
     READY = "ready"
@@ -40,14 +43,16 @@ class ComponentStatus(Enum):
 
 class ErrorSeverity(Enum):
     """Error severity levels"""
+
     CRITICAL = "critical"  # Abort startup
-    WARNING = "warning"    # Continue with degraded mode
-    INFO = "info"          # Informational only
+    WARNING = "warning"  # Continue with degraded mode
+    INFO = "info"  # Informational only
 
 
 @dataclass
 class InitializationResult:
     """Initialization result structure"""
+
     success: bool
     phase: InitPhase
     message: str
@@ -59,6 +64,7 @@ class InitializationResult:
 @dataclass
 class ComponentInfo:
     """Component information structure"""
+
     name: str
     status: ComponentStatus
     startup_time: float
@@ -68,7 +74,7 @@ class ComponentInfo:
 class WebthreadInitializer:
     """
     Python WebthreadInitializer
-    
+
     One-time startup orchestrator for ROA system initialization.
     Coordinates UE5 environment setup, component initialization,
     and system validation.
@@ -77,7 +83,7 @@ class WebthreadInitializer:
     def __init__(self, config_path: str = "./Config"):
         """
         Initialize WebthreadInitializer
-        
+
         Args:
             config_path: Path to configuration directory
         """
@@ -85,42 +91,42 @@ class WebthreadInitializer:
         self.config_path = config_path
         self.workspace_path = "./Workspace"
         self.log_path = "./Logs"
-        
+
         # State
         self.current_phase = InitPhase.NOT_STARTED
         self.overall_progress = 0.0
         self.abort_requested = False
-        
+
         # Timing
         self.start_time = 0.0
         self.phase_start_time = 0.0
-        
+
         # Components
         self.components: List[ComponentInfo] = []
-        
+
         # Logging
         self.init_log: List[str] = []
         self.warnings: List[str] = []
         self.errors: List[str] = []
-        
+
         # Callbacks
         self.progress_callback = None
-        
+
         # Configuration
         self.config: Dict = {}
-        
+
         self.log_progress("WebthreadInitializer created")
 
     def initialize(self) -> InitializationResult:
         """
         Initialize the entire ROA system
-        
+
         Returns:
             InitializationResult with status and details
         """
         self.log_progress("=== ROA System Initialization Started ===")
         self.log_progress(f"Timestamp: {datetime.now().isoformat()}")
-        
+
         self.start_time = time.time()
         result = InitializationResult(
             success=False,
@@ -128,7 +134,7 @@ class WebthreadInitializer:
             message="",
             total_time=0.0,
             warnings=[],
-            errors=[]
+            errors=[],
         )
 
         try:
@@ -137,10 +143,13 @@ class WebthreadInitializer:
             if not self.run_pre_checks():
                 result.message = "Pre-checks failed"
                 result.phase = InitPhase.PRE_CHECKS
-                self.handle_error(ErrorSeverity.CRITICAL, "Pre-checks failed - aborting initialization")
+                self.handle_error(
+                    ErrorSeverity.CRITICAL,
+                    "Pre-checks failed - aborting initialization",
+                )
                 self.write_init_log()
                 return result
-            
+
             if self.abort_requested:
                 result.message = "Initialization aborted by user"
                 self.write_init_log()
@@ -151,23 +160,31 @@ class WebthreadInitializer:
             if not self.run_environment_setup():
                 result.message = "Environment setup failed"
                 result.phase = InitPhase.ENVIRONMENT_SETUP
-                self.handle_error(ErrorSeverity.CRITICAL, "Environment setup failed - aborting initialization")
+                self.handle_error(
+                    ErrorSeverity.CRITICAL,
+                    "Environment setup failed - aborting initialization",
+                )
                 self.write_init_log()
                 return result
-            
+
             if self.abort_requested:
                 result.message = "Initialization aborted by user"
                 self.write_init_log()
                 return result
 
             # Phase 3: Component Initialization (15-25 seconds)
-            self.update_progress(InitPhase.COMPONENT_INITIALIZATION, 0.50, "Initializing components...")
+            self.update_progress(
+                InitPhase.COMPONENT_INITIALIZATION, 0.50, "Initializing components..."
+            )
             if not self.run_component_initialization():
                 result.message = "Component initialization failed"
                 result.phase = InitPhase.COMPONENT_INITIALIZATION
-                self.handle_error(ErrorSeverity.WARNING, "Some components failed - continuing with degraded mode")
+                self.handle_error(
+                    ErrorSeverity.WARNING,
+                    "Some components failed - continuing with degraded mode",
+                )
                 # Continue with partial initialization
-            
+
             if self.abort_requested:
                 result.message = "Initialization aborted by user"
                 self.write_init_log()
@@ -178,7 +195,10 @@ class WebthreadInitializer:
             if not self.run_validation():
                 result.message = "System validation failed"
                 result.phase = InitPhase.VALIDATION
-                self.handle_error(ErrorSeverity.WARNING, "Validation issues detected - system may not function optimally")
+                self.handle_error(
+                    ErrorSeverity.WARNING,
+                    "Validation issues detected - system may not function optimally",
+                )
                 # Continue anyway
 
             # Initialization complete
@@ -189,12 +209,12 @@ class WebthreadInitializer:
             result.message = "ROA system initialized successfully"
             result.warnings = self.warnings.copy()
             result.errors = self.errors.copy()
-            
+
             self.log_progress("=== Initialization Complete ===")
             self.log_progress(f"Total time: {result.total_time:.2f} seconds")
             self.log_progress(f"Warnings: {len(self.warnings)}")
             self.log_progress(f"Errors: {len(self.errors)}")
-            
+
         except Exception as e:
             result.success = False
             result.message = f"Initialization exception: {str(e)}"
@@ -208,7 +228,7 @@ class WebthreadInitializer:
         """Run pre-initialization checks"""
         self.log_progress("--- Phase 1: Pre-checks ---")
         self.phase_start_time = time.time()
-        
+
         checks = [
             ("Python version", self.check_python_version),
             ("Platform compatibility", self.check_platform_compatibility),
@@ -216,7 +236,7 @@ class WebthreadInitializer:
             ("Network connectivity", self.check_network_connectivity),
             ("Database access", self.check_database_access),
         ]
-        
+
         all_passed = True
         for check_name, check_func in checks:
             try:
@@ -228,7 +248,7 @@ class WebthreadInitializer:
             except Exception as e:
                 self.log_error(f"{check_name} check raised exception: {e}")
                 all_passed = False
-        
+
         phase_time = time.time() - self.phase_start_time
         self.log_progress(f"Pre-checks completed in {phase_time:.2f} seconds")
         return all_passed
@@ -237,12 +257,12 @@ class WebthreadInitializer:
         """Setup the environment"""
         self.log_progress("--- Phase 2: Environment Setup ---")
         self.phase_start_time = time.time()
-        
+
         steps = [
             ("Create workspace directories", self.create_workspace_directories),
             ("Load configurations", self.load_configurations),
         ]
-        
+
         for step_name, step_func in steps:
             try:
                 if not step_func():
@@ -250,7 +270,7 @@ class WebthreadInitializer:
             except Exception as e:
                 self.log_error(f"{step_name} raised exception: {e}")
                 return False
-        
+
         phase_time = time.time() - self.phase_start_time
         self.log_progress(f"Environment setup completed in {phase_time:.2f} seconds")
         return True
@@ -259,7 +279,7 @@ class WebthreadInitializer:
         """Initialize all components"""
         self.log_progress("--- Phase 3: Component Initialization ---")
         self.phase_start_time = time.time()
-        
+
         # Component initialization order
         components = [
             ("FTI", self.start_fti),
@@ -268,7 +288,7 @@ class WebthreadInitializer:
             ("COMC", self.start_comc),
             ("Runtime Webthread", self.start_runtime_webthread),
         ]
-        
+
         success_count = 0
         for comp_name, start_func in components:
             try:
@@ -278,10 +298,10 @@ class WebthreadInitializer:
                     self.log_warning(f"{comp_name} initialization failed")
             except Exception as e:
                 self.log_error(f"{comp_name} initialization raised exception: {e}")
-        
+
         phase_time = time.time() - self.phase_start_time
         self.log_progress(f"Component initialization completed in {phase_time:.2f} seconds")
-        
+
         # Allow up to 2 component failures
         return success_count >= 3
 
@@ -289,11 +309,11 @@ class WebthreadInitializer:
         """Validate system functionality"""
         self.log_progress("--- Phase 4: Validation ---")
         self.phase_start_time = time.time()
-        
+
         # TODO: Implement actual validation
         # For now, just simulate
         time.sleep(0.5)
-        
+
         phase_time = time.time() - self.phase_start_time
         self.log_progress(f"Validation completed in {phase_time:.2f} seconds")
         return True
@@ -305,7 +325,7 @@ class WebthreadInitializer:
         version = platform.python_version()
         self.log_progress(f"Python version: {version}")
         # Required: Python 3.10+
-        major, minor, _ = version.split('.')
+        major, minor, _ = version.split(".")
         return int(major) >= 3 and int(minor) >= 10
 
     def check_platform_compatibility(self) -> bool:
@@ -338,7 +358,7 @@ class WebthreadInitializer:
     def create_workspace_directories(self) -> bool:
         """Create necessary workspace directories"""
         self.log_progress("Creating workspace directories...")
-        
+
         directories = [
             self.workspace_path,
             self.log_path,
@@ -346,7 +366,7 @@ class WebthreadInitializer:
             os.path.join(self.workspace_path, "tasks"),
             os.path.join(self.workspace_path, "configs"),
         ]
-        
+
         for directory in directories:
             try:
                 os.makedirs(directory, exist_ok=True)
@@ -354,21 +374,21 @@ class WebthreadInitializer:
             except Exception as e:
                 self.log_error(f"Failed to create directory {directory}: {e}")
                 return False
-        
+
         return True
 
     def load_configurations(self) -> bool:
         """Load configuration files"""
         self.log_progress("Loading configuration files...")
-        
+
         config_files = {
-            'physics': 'roa_physics_config.ini',
-            'keybindings': 'roa_keybindings.json',
-            'ui': 'roa_ui_settings.json',
-            'component': 'roa_component_config.yaml',
-            'safety': 'roa_safety_rules.json',
+            "physics": "roa_physics_config.ini",
+            "keybindings": "roa_keybindings.json",
+            "ui": "roa_ui_settings.json",
+            "component": "roa_component_config.yaml",
+            "safety": "roa_safety_rules.json",
         }
-        
+
         for config_type, filename in config_files.items():
             filepath = os.path.join(self.config_path, filename)
             try:
@@ -379,7 +399,7 @@ class WebthreadInitializer:
                     self.log_warning(f"Config file not found: {filename} - using defaults")
             except Exception as e:
                 self.log_error(f"Error loading {config_type} config: {e}")
-        
+
         return True
 
     # Component initialization implementations
@@ -390,16 +410,16 @@ class WebthreadInitializer:
             name="FTI",
             status=ComponentStatus.STARTING,
             startup_time=time.time(),
-            version="1.0.0"
+            version="1.0.0",
         )
-        
+
         # TODO: Implement actual FTI startup
         time.sleep(0.5)
-        
+
         info.status = ComponentStatus.READY
         info.startup_time = time.time() - info.startup_time
         self.components.append(info)
-        
+
         self.log_progress("FTI started successfully")
         return True
 
@@ -410,16 +430,16 @@ class WebthreadInitializer:
             name="DIMC",
             status=ComponentStatus.STARTING,
             startup_time=time.time(),
-            version="1.0.0"
+            version="1.0.0",
         )
-        
+
         # TODO: Implement actual DIMC startup
         time.sleep(0.5)
-        
+
         info.status = ComponentStatus.READY
         info.startup_time = time.time() - info.startup_time
         self.components.append(info)
-        
+
         self.log_progress("DIMC started successfully")
         return True
 
@@ -430,16 +450,16 @@ class WebthreadInitializer:
             name="ROC",
             status=ComponentStatus.STARTING,
             startup_time=time.time(),
-            version="1.0.0"
+            version="1.0.0",
         )
-        
+
         # TODO: Implement actual ROC startup
         time.sleep(0.5)
-        
+
         info.status = ComponentStatus.READY
         info.startup_time = time.time() - info.startup_time
         self.components.append(info)
-        
+
         self.log_progress("ROC started successfully")
         return True
 
@@ -450,16 +470,16 @@ class WebthreadInitializer:
             name="COMC",
             status=ComponentStatus.STARTING,
             startup_time=time.time(),
-            version="1.0.0"
+            version="1.0.0",
         )
-        
+
         # TODO: Implement actual COMC startup
         time.sleep(0.5)
-        
+
         info.status = ComponentStatus.READY
         info.startup_time = time.time() - info.startup_time
         self.components.append(info)
-        
+
         self.log_progress("COMC started successfully")
         return True
 
@@ -470,16 +490,16 @@ class WebthreadInitializer:
             name="Runtime Webthread",
             status=ComponentStatus.STARTING,
             startup_time=time.time(),
-            version="1.0.0"
+            version="1.0.0",
         )
-        
+
         # TODO: Implement actual Runtime Webthread startup
         time.sleep(0.5)
-        
+
         info.status = ComponentStatus.READY
         info.startup_time = time.time() - info.startup_time
         self.components.append(info)
-        
+
         self.log_progress("Runtime Webthread started successfully")
         return True
 
@@ -519,12 +539,12 @@ class WebthreadInitializer:
     def write_init_log(self):
         """Write initialization log to file"""
         self.log_progress("Writing initialization log...")
-        
+
         log_file = os.path.join(self.log_path, "roa_init.log")
         try:
             os.makedirs(self.log_path, exist_ok=True)
-            with open(log_file, 'w') as f:
-                f.write('\n'.join(self.init_log))
+            with open(log_file, "w") as f:
+                f.write("\n".join(self.init_log))
             self.log_progress(f"Log written to {log_file}")
         except Exception as e:
             self.logger.error(f"Failed to write log file: {e}")
@@ -534,9 +554,9 @@ class WebthreadInitializer:
         """Update initialization progress"""
         self.current_phase = phase
         self.overall_progress = progress
-        
+
         self.log_progress(f"{message} ({int(progress * 100)}%)")
-        
+
         if self.progress_callback:
             self.progress_callback(phase, progress, message)
 
@@ -556,20 +576,20 @@ class WebthreadInitializer:
         """Abort initialization"""
         self.log_progress("Abort requested!")
         self.abort_requested = True
-    
+
     def run_prechecks(self) -> Dict:
         """
         Run pre-initialization checks (wrapper for tests)
-        
+
         Returns:
             Dictionary with check results
         """
         checks_result = {
-            'version_check': self.check_python_version(),
-            'platform_check': self.check_platform_compatibility(),
-            'hardware_check': self.check_hardware_requirements(),
-            'network_check': self.check_network_connectivity(),
-            'database_check': self.check_database_access(),
+            "version_check": self.check_python_version(),
+            "platform_check": self.check_platform_compatibility(),
+            "hardware_check": self.check_hardware_requirements(),
+            "network_check": self.check_network_connectivity(),
+            "database_check": self.check_database_access(),
         }
         return checks_result
 
@@ -578,12 +598,12 @@ def main():
     """Main entry point for standalone testing"""
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-    
+
     initializer = WebthreadInitializer()
     result = initializer.initialize()
-    
+
     print(f"\nInitialization Result:")
     print(f"Success: {result.success}")
     print(f"Phase: {result.phase.value}")
@@ -593,5 +613,5 @@ def main():
     print(f"Errors: {len(result.errors)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

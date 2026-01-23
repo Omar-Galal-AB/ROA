@@ -3,8 +3,9 @@ conftest.py - pytest configuration for HB Subsystem tests
 ROA - Robot Operations & Automation
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 # Add parent directories to path so we can import hb_subsystem
@@ -26,18 +27,15 @@ def temp_storage_dir(tmp_path):
     persistent_dir = tmp_path / "persistent"
     fast_dir.mkdir()
     persistent_dir.mkdir()
-    
-    return {
-        'fast': str(fast_dir),
-        'persistent': str(persistent_dir)
-    }
+
+    return {"fast": str(fast_dir), "persistent": str(persistent_dir)}
 
 
 @pytest.fixture
 def mock_component_state():
     """Mock component state for testing"""
     return {
-        'FTI': {'health': 'HEALTHY', 'state': 'ACTIVE'},
-        'ROC': {'health': 'HEALTHY', 'state': 'ACTIVE'},
-        'DIMC': {'health': 'DEGRADED', 'state': 'ACTIVE'},
+        "FTI": {"health": "HEALTHY", "state": "ACTIVE"},
+        "ROC": {"health": "HEALTHY", "state": "ACTIVE"},
+        "DIMC": {"health": "DEGRADED", "state": "ACTIVE"},
     }

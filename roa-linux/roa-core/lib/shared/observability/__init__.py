@@ -12,18 +12,18 @@ Includes:
 
 Usage:
     from roa_observability import ROAObservability
-    
+
     obs = ROAObservability(
         component_name="webthread",
         service_version="1.0.0"
     )
-    
+
     # Use logging
     obs.logger.info("Starting component", extra={"status": "initializing"})
-    
+
     # Use metrics
     obs.metrics.request_count.labels(method="process").inc()
-    
+
     # Use tracing
     with obs.tracer.start_span("operation_name"):
         do_work()
@@ -33,101 +33,93 @@ __version__ = "1.0.0"
 __author__ = "ROA Team"
 
 from .config import ObservabilityConfig, get_component_config
+from .health import ComponentHealth, HealthCheck, HealthStatus
+from .mcap_recorder import MCAPRecorder, ROAEventRecorder
+from .metrics import MetricsServer, ResourceCollector, ROAMetrics, counted, timed
+from .observability import ROAObservability
 from .structured_logger import ROALogger, get_logger
-from .metrics import ROAMetrics, MetricsServer, ResourceCollector, timed, counted
-from .tracing import (
-    ROATracer, 
-    trace_method, 
-    trace_async_method,
-    ROS2TracingMixin,
-    trace_ros2_callback,
-    trace_ros2_timer,
-    UE5TracingContext,
+from .tracing import (  # Request tracking types; Protocol-specific spans
+    CacheSpanAttributes,
     ControlLoopTracer,
-    get_trace_id,
-    get_span_id,
-    TraceContextMiddleware,
-    # Request tracking types
-    RequestType,
+    DatabaseSpanAttributes,
     ErrorCategory,
+    GRPCSpanAttributes,
+    HTTPSpanAttributes,
     RequestContext,
+    RequestType,
+    ROATracer,
+    ROS2TracingMixin,
     SpanBuilder,
     SpanContext,
-    # Protocol-specific spans
-    HTTPSpanAttributes,
-    http_server_span,
-    http_client_span,
-    GRPCSpanAttributes,
-    grpc_server_span,
-    grpc_client_span,
+    TraceContextMiddleware,
+    UE5TracingContext,
     WebSocketSpanAttributes,
-    websocket_span,
-    DatabaseSpanAttributes,
-    database_span,
-    CacheSpanAttributes,
     cache_span,
+    database_span,
+    get_span_id,
+    get_trace_id,
+    grpc_client_span,
+    grpc_server_span,
+    http_client_span,
+    http_server_span,
+    trace_async_method,
+    trace_method,
+    trace_ros2_callback,
+    trace_ros2_timer,
+    websocket_span,
 )
-from .health import HealthCheck, HealthStatus, ComponentHealth
-from .observability import ROAObservability
-from .mcap_recorder import MCAPRecorder, ROAEventRecorder
 
 __all__ = [
     # Main entry point
-    'ROAObservability',
-    
+    "ROAObservability",
     # Configuration
-    'ObservabilityConfig',
-    'get_component_config',
-    
+    "ObservabilityConfig",
+    "get_component_config",
     # Logging
-    'ROALogger',
-    'get_logger',
-    
+    "ROALogger",
+    "get_logger",
     # Metrics
-    'ROAMetrics',
-    'MetricsServer',
-    'ResourceCollector',
-    'timed',
-    'counted',
-    
+    "ROAMetrics",
+    "MetricsServer",
+    "ResourceCollector",
+    "timed",
+    "counted",
     # Tracing
-    'ROATracer',
-    'trace_method',
-    'trace_async_method',
-    'ROS2TracingMixin',
-    'trace_ros2_callback',
-    'trace_ros2_timer',
-    'UE5TracingContext',
-    'ControlLoopTracer',
-    'get_trace_id',
-    'get_span_id',
-    'TraceContextMiddleware',
+    "ROATracer",
+    "trace_method",
+    "trace_async_method",
+    "ROS2TracingMixin",
+    "trace_ros2_callback",
+    "trace_ros2_timer",
+    "UE5TracingContext",
+    "ControlLoopTracer",
+    "get_trace_id",
+    "get_span_id",
+    "TraceContextMiddleware",
     # Request tracking
-    'RequestType',
-    'ErrorCategory',
-    'RequestContext',
-    'SpanBuilder',
-    'SpanContext',
+    "RequestType",
+    "ErrorCategory",
+    "RequestContext",
+    "SpanBuilder",
+    "SpanContext",
     # Protocol-specific spans
-    'HTTPSpanAttributes',
-    'http_server_span',
-    'http_client_span',
-    'GRPCSpanAttributes',
-    'grpc_server_span',
-    'grpc_client_span',
-    'WebSocketSpanAttributes',
-    'websocket_span',
-    'DatabaseSpanAttributes',
-    'database_span',
-    'CacheSpanAttributes',
-    'cache_span',
-    
+    "HTTPSpanAttributes",
+    "http_server_span",
+    "http_client_span",
+    "GRPCSpanAttributes",
+    "grpc_server_span",
+    "grpc_client_span",
+    "WebSocketSpanAttributes",
+    "websocket_span",
+    "DatabaseSpanAttributes",
+    "database_span",
+    "CacheSpanAttributes",
+    "cache_span",
     # Health
-    'HealthCheck',
-    'HealthStatus',
-    'ComponentHealth',
-    
+    "HealthCheck",
+    "HealthStatus",
+    "ComponentHealth",
     # Recording
-    'MCAPRecorder',
-    'ROAEventRecorder',
+    "MCAPRecorder",
+    "ROAEventRecorder",
 ]

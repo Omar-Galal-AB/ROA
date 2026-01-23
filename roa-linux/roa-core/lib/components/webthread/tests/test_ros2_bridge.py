@@ -2,16 +2,17 @@
 Tests for ROS2Bridge module
 """
 
-import pytest
-import sys
 import os
+import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'python'))
+import pytest
 
-from ROS2Bridge.ros2_node import ROS2Node
-from ROS2Bridge.topic_manager import TopicManager
-from ROS2Bridge.service_handler import ServiceHandler
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "python"))
+
 from ROS2Bridge.action_handler import ActionHandler
+from ROS2Bridge.ros2_node import ROS2Node
+from ROS2Bridge.service_handler import ServiceHandler
+from ROS2Bridge.topic_manager import TopicManager
 
 
 class TestROS2Node:
@@ -61,8 +62,8 @@ class TestTopicManager:
         node = ROS2Node()
         node.initialize()
         manager = TopicManager(node)
-        
-        result = manager.create_publisher('test_topic', 'std_msgs/String')
+
+        result = manager.create_publisher("test_topic", "std_msgs/String")
         assert result is True
 
     def test_subscriber_creation(self):
@@ -70,11 +71,11 @@ class TestTopicManager:
         node = ROS2Node()
         node.initialize()
         manager = TopicManager(node)
-        
+
         def callback(msg):
             pass
-        
-        result = manager.create_subscriber('test_topic', 'std_msgs/String', callback)
+
+        result = manager.create_subscriber("test_topic", "std_msgs/String", callback)
         assert result is True
 
 
@@ -93,8 +94,8 @@ class TestServiceHandler:
         node = ROS2Node()
         node.initialize()
         handler = ServiceHandler(node)
-        
-        result = handler.create_client('test_service', 'std_srvs/Trigger')
+
+        result = handler.create_client("test_service", "std_srvs/Trigger")
         assert result is True
 
 
@@ -113,10 +114,10 @@ class TestActionHandler:
         node = ROS2Node()
         node.initialize()
         handler = ActionHandler(node)
-        
-        result = handler.create_client('test_action', 'example_interfaces/Fibonacci')
+
+        result = handler.create_client("test_action", "example_interfaces/Fibonacci")
         assert result is True
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -7,21 +7,35 @@ A standalone monitoring dashboard for the Webthread component that can run
 independently from UE5 to monitor system health, component status, and logs.
 """
 
-import sys
-import logging
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTextEdit, QPushButton, QGroupBox, QGridLayout,
-    QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
-    QSplitter, QTabWidget
-)
-from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QColor
-from datetime import datetime
 import json
+import logging
 
 # Add parent directory to path for imports
 import os
+import sys
+from datetime import datetime
+
+from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QApplication,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QSplitter,
+    QStatusBar,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'python'))
 
 # Import dark theme
@@ -33,8 +47,9 @@ except ImportError:
     DARK_THEME = ""
 
 try:
-    from webthread_core import WebthreadCore, ComponentHealth
     from Logging.logger import setup_roa_logger
+    from webthread_core import ComponentHealth, WebthreadCore
+
     # Optional: ConnectionManager may not exist yet
     try:
         from StatusMonitor.connection_manager import ConnectionManager

@@ -8,6 +8,6 @@ from .gazebo_sync import GazeboSync
 from .physics_bridge import PhysicsBridge
 
 __all__ = [
-    'GazeboSync',
-    'PhysicsBridge',
+    "GazeboSync",
+    "PhysicsBridge",
 ]

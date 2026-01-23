@@ -16,16 +16,17 @@ to robot assembly without needing to use the Python console.
 
 Usage:
     This file is auto-loaded when UE5 starts (via init_unreal.py).
-    
+
     Manual loading:
         import ROA.editor_menu
         ROA.editor_menu.register_menus()
 """
 
-import unreal
-import os
 import json
-from typing import Optional, List
+import os
+from typing import List, Optional
+
+import unreal
 
 # Try to import our assembler
 try:
@@ -38,19 +39,20 @@ except ImportError:
 # FILE DIALOG UTILITIES
 # =============================================================================
 
+
 def open_file_dialog(
     title: str = "Select File",
     default_path: str = "",
-    file_types: str = "All Files (*.*)|*.*"
+    file_types: str = "All Files (*.*)|*.*",
 ) -> Optional[str]:
     """
     Open a native file dialog and return the selected file path.
-    
+
     Args:
         title: Dialog window title
         default_path: Initial directory to open
         file_types: Filter string (UE4 format)
-        
+
     Returns:
         Selected file path or None if cancelled
     """
@@ -61,9 +63,9 @@ def open_file_dialog(
         default_path,
         "",
         file_types,
-        False  # Allow multiple = False
+        False,  # Allow multiple = False
     )
-    
+
     if result and len(result) > 0:
         return result[0]
     return None
@@ -72,36 +74,37 @@ def open_file_dialog(
 def open_hierarchy_file_dialog() -> Optional[str]:
     """
     Open file dialog specifically for hierarchy JSON files.
-    
+
     Returns:
         Path to selected hierarchy JSON file or None
     """
     import tempfile
-    
+
     # Start in temp directory where hierarchy files are saved
     default_path = tempfile.gettempdir()
-    
+
     # Also check ROA output directories
     roa_dirs = [
         "D:/ROA/FTI-Outputs",
         "D:/ROA/output-tests",
     ]
-    
+
     for d in roa_dirs:
         if os.path.isdir(d):
             default_path = d
             break
-    
+
     return open_file_dialog(
         title="Select Robot Hierarchy File",
         default_path=default_path,
-        file_types="Hierarchy JSON (*.json)|*.json|All Files (*.*)|*.*"
+        file_types="Hierarchy JSON (*.json)|*.json|All Files (*.*)|*.*",
     )
 
 
 # =============================================================================
 # ASSEMBLY COMMANDS
 # =============================================================================
+
 
 def assemble_robot_from_dialog():
     """
@@ -111,12 +114,12 @@ def assemble_robot_from_dialog():
     if assembler is None:
         unreal.log_error("ROA: urdf_robot_assembler module not found!")
         return
-    
+
     print("\n" + "=" * 60)
     print("  ROA Robot Assembler")
     print("=" * 60)
     print("\nOpening file dialog...")
-    
+
     # Try using UE5's built-in dialog first
     try:
         hierarchy_path = open_hierarchy_file_dialog()
@@ -124,30 +127,30 @@ def assemble_robot_from_dialog():
         print(f"[WARN] Could not open file dialog: {e}")
         print("[INFO] Falling back to auto-detection...")
         hierarchy_path = None
-    
+
     if not hierarchy_path:
         # Fall back to listing available robots
         print("\n[INFO] No file selected. Available robots:")
         robots = assembler.list_robots()
-        
+
         if robots:
             print("\n[TIP] Use one of these commands in Python console:")
             for r in robots:
                 print(f"  assemble_robot('{r}')")
         return
-    
+
     # Validate the file
     if not os.path.isfile(hierarchy_path):
         print(f"[ERROR] File not found: {hierarchy_path}")
         return
-    
-    if not hierarchy_path.endswith('.json'):
+
+    if not hierarchy_path.endswith(".json"):
         print(f"[WARN] File may not be a hierarchy JSON: {hierarchy_path}")
-    
+
     # Run assembly
     print(f"\n[INFO] Assembling from: {hierarchy_path}")
     success = assembler.assemble_robot(hierarchy_path, verbose=True)
-    
+
     if success:
         print("\n[SUCCESS] Robot assembled!")
     else:
@@ -161,7 +164,7 @@ def assemble_all_robots():
     if assembler is None:
         unreal.log_error("ROA: urdf_robot_assembler module not found!")
         return
-    
+
     count = assembler.assemble_all(verbose=True)
     print(f"\n[DONE] Assembled {count} robot(s)")
 
@@ -173,7 +176,7 @@ def list_available_robots():
     if assembler is None:
         unreal.log_error("ROA: urdf_robot_assembler module not found!")
         return
-    
+
     assembler.list_robots()
 
 
@@ -184,7 +187,7 @@ def reset_all_robots():
     if assembler is None:
         unreal.log_error("ROA: urdf_robot_assembler module not found!")
         return
-    
+
     assembler.reset_robot("")
 
 
@@ -201,7 +204,7 @@ _fti_submenu = None
 def register_menus():
     """
     Register ROA menu items in the UE5 Editor.
-    
+
     Creates a nested menu structure:
         Main Toolbar > ROA > FTI > Assemble Robot...
                                  > Assemble All Robots
@@ -209,62 +212,53 @@ def register_menus():
                                  > Reset Robots
     """
     global _registered_entries, _roa_menu, _fti_submenu
-    
+
     try:
         # Get the tool menus
         tool_menus = unreal.ToolMenus.get()
-        
+
         # Get the main menu bar
         main_menu = tool_menus.find_menu("LevelEditor.MainMenu")
-        
+
         if not main_menu:
             print("[ROA] Could not find main menu bar")
             return False
-        
+
         # =====================================================================
         # Create ROA top-level menu (next to File, Edit, Window, etc.)
         # =====================================================================
-        
+
         # Add ROA as a new top-level menu
         roa_menu_name = "LevelEditor.MainMenu.ROA"
-        
+
         # First, add ROA entry to main menu bar
-        roa_entry = unreal.ToolMenuEntry(
-            name="ROA",
-            type=unreal.MultiBlockType.MENU_ENTRY
-        )
+        roa_entry = unreal.ToolMenuEntry(name="ROA", type=unreal.MultiBlockType.MENU_ENTRY)
         roa_entry.set_label("ROA")
         roa_entry.set_tool_tip("Robotics Open Architecture Tools")
-        
+
         # Create the ROA submenu
         _roa_menu = tool_menus.register_menu(
-            roa_menu_name,
-            unreal.MultiBoxType.MENU,
-            False  # Not transient
+            roa_menu_name, unreal.MultiBoxType.MENU, False  # Not transient
         )
-        
+
         # Add ROA menu to main menu bar
         main_menu.add_sub_menu(
             "MainMenu",  # Owner
             "",  # Section (empty = default)
             "ROA",  # Name
             "ROA",  # Label
-            "Robotics Open Architecture Tools"  # Tooltip
+            "Robotics Open Architecture Tools",  # Tooltip
         )
-        
+
         # =====================================================================
         # Create FTI submenu under ROA
         # =====================================================================
-        
+
         fti_menu_name = "LevelEditor.MainMenu.ROA.FTI"
-        
+
         # Register FTI submenu
-        _fti_submenu = tool_menus.register_menu(
-            fti_menu_name,
-            unreal.MultiBoxType.MENU,
-            False
-        )
-        
+        _fti_submenu = tool_menus.register_menu(fti_menu_name, unreal.MultiBoxType.MENU, False)
+
         # Add FTI as submenu of ROA
         roa_menu = tool_menus.find_menu(roa_menu_name)
         if roa_menu:
@@ -273,88 +267,86 @@ def register_menus():
                 "",  # Section
                 "FTI",  # Name
                 "FTI",  # Label - Files Type Importer
-                "Files Type Importer - Robot import and assembly tools"  # Tooltip
+                "Files Type Importer - Robot import and assembly tools",  # Tooltip
             )
-        
+
         # =====================================================================
         # Add FTI menu entries
         # =====================================================================
-        
+
         fti_menu = tool_menus.find_menu(fti_menu_name)
         if fti_menu:
             # Add section
             fti_menu.add_section("FTIAssembly", "Assembly")
-            
+
             # Entry 1: Assemble Robot (with file dialog)
             entry_assemble = unreal.ToolMenuEntry(
-                name="FTI_AssembleRobot",
-                type=unreal.MultiBlockType.MENU_ENTRY
+                name="FTI_AssembleRobot", type=unreal.MultiBlockType.MENU_ENTRY
             )
             entry_assemble.set_label("Assemble Robot...")
-            entry_assemble.set_tool_tip("Select a hierarchy JSON file and assemble the robot in the scene")
+            entry_assemble.set_tool_tip(
+                "Select a hierarchy JSON file and assemble the robot in the scene"
+            )
             entry_assemble.set_string_command(
                 unreal.ToolMenuStringCommandType.PYTHON,
                 "",
-                "from ROA.editor_menu import assemble_robot_from_dialog; assemble_robot_from_dialog()"
+                "from ROA.editor_menu import assemble_robot_from_dialog; assemble_robot_from_dialog()",
             )
             fti_menu.add_menu_entry("FTIAssembly", entry_assemble)
             _registered_entries.append(entry_assemble)
-            
+
             # Entry 2: Assemble All
             entry_all = unreal.ToolMenuEntry(
-                name="FTI_AssembleAll",
-                type=unreal.MultiBlockType.MENU_ENTRY
+                name="FTI_AssembleAll", type=unreal.MultiBlockType.MENU_ENTRY
             )
             entry_all.set_label("Assemble All Robots")
             entry_all.set_tool_tip("Auto-detect and assemble all available robots")
             entry_all.set_string_command(
                 unreal.ToolMenuStringCommandType.PYTHON,
                 "",
-                "from ROA.editor_menu import assemble_all_robots; assemble_all_robots()"
+                "from ROA.editor_menu import assemble_all_robots; assemble_all_robots()",
             )
             fti_menu.add_menu_entry("FTIAssembly", entry_all)
             _registered_entries.append(entry_all)
-            
+
             # Add separator and utilities section
             fti_menu.add_section("FTIUtilities", "Utilities")
-            
+
             # Entry 3: List Robots
             entry_list = unreal.ToolMenuEntry(
-                name="FTI_ListRobots", 
-                type=unreal.MultiBlockType.MENU_ENTRY
+                name="FTI_ListRobots", type=unreal.MultiBlockType.MENU_ENTRY
             )
             entry_list.set_label("List Available Robots")
             entry_list.set_tool_tip("Show hierarchy files available for assembly")
             entry_list.set_string_command(
                 unreal.ToolMenuStringCommandType.PYTHON,
                 "",
-                "from ROA.editor_menu import list_available_robots; list_available_robots()"
+                "from ROA.editor_menu import list_available_robots; list_available_robots()",
             )
             fti_menu.add_menu_entry("FTIUtilities", entry_list)
             _registered_entries.append(entry_list)
-            
+
             # Entry 4: Reset Robots
             entry_reset = unreal.ToolMenuEntry(
-                name="FTI_ResetRobots",
-                type=unreal.MultiBlockType.MENU_ENTRY
+                name="FTI_ResetRobots", type=unreal.MultiBlockType.MENU_ENTRY
             )
             entry_reset.set_label("Reset Robots to Origin")
             entry_reset.set_tool_tip("Reset all robot actors to their origin positions")
             entry_reset.set_string_command(
                 unreal.ToolMenuStringCommandType.PYTHON,
                 "",
-                "from ROA.editor_menu import reset_all_robots; reset_all_robots()"
+                "from ROA.editor_menu import reset_all_robots; reset_all_robots()",
             )
             fti_menu.add_menu_entry("FTIUtilities", entry_reset)
             _registered_entries.append(entry_reset)
-        
+
         # Refresh menus to apply changes
         tool_menus.refresh_all_widgets()
-        
+
         print("[ROA] Editor menus registered successfully!")
         print("[ROA] Menu structure: ROA > FTI > Assemble Robot...")
         return True
-        
+
     except Exception as e:
         print(f"[ROA] Could not register menus: {e}")
         print("[ROA] Falling back to File menu integration...")
@@ -366,53 +358,51 @@ def _register_fallback_menus():
     Fallback: Add ROA items to File menu if top-level menu fails.
     """
     global _registered_entries
-    
+
     try:
         tool_menus = unreal.ToolMenus.get()
         file_menu = tool_menus.find_menu("LevelEditor.MainMenu.File")
-        
+
         if not file_menu:
             print("[ROA] Could not find File menu")
             return False
-        
+
         # Add ROA section to File menu
         file_menu.add_section("ROASection", "ROA > FTI")
-        
+
         # Entry 1: Assemble Robot
         entry_assemble = unreal.ToolMenuEntry(
-            name="ROA_FTI_AssembleRobot",
-            type=unreal.MultiBlockType.MENU_ENTRY
+            name="ROA_FTI_AssembleRobot", type=unreal.MultiBlockType.MENU_ENTRY
         )
         entry_assemble.set_label("ROA > FTI > Assemble Robot...")
         entry_assemble.set_tool_tip("Select a hierarchy JSON file and assemble the robot")
         entry_assemble.set_string_command(
             unreal.ToolMenuStringCommandType.PYTHON,
             "",
-            "from ROA.editor_menu import assemble_robot_from_dialog; assemble_robot_from_dialog()"
+            "from ROA.editor_menu import assemble_robot_from_dialog; assemble_robot_from_dialog()",
         )
         file_menu.add_menu_entry("ROASection", entry_assemble)
         _registered_entries.append(entry_assemble)
-        
+
         # Entry 2: Assemble All
         entry_all = unreal.ToolMenuEntry(
-            name="ROA_FTI_AssembleAll",
-            type=unreal.MultiBlockType.MENU_ENTRY
+            name="ROA_FTI_AssembleAll", type=unreal.MultiBlockType.MENU_ENTRY
         )
         entry_all.set_label("ROA > FTI > Assemble All Robots")
         entry_all.set_string_command(
             unreal.ToolMenuStringCommandType.PYTHON,
             "",
-            "from ROA.editor_menu import assemble_all_robots; assemble_all_robots()"
+            "from ROA.editor_menu import assemble_all_robots; assemble_all_robots()",
         )
         file_menu.add_menu_entry("ROASection", entry_all)
         _registered_entries.append(entry_all)
-        
+
         tool_menus.refresh_all_widgets()
-        
+
         print("[ROA] Fallback menus registered in File menu")
         print("[ROA] Look for 'ROA > FTI' section at bottom of File menu")
         return True
-        
+
     except Exception as e:
         print(f"[ROA] Fallback menu registration failed: {e}")
         print("[ROA] Use Python console commands instead:")
@@ -425,19 +415,19 @@ def unregister_menus():
     Remove ROA menu items from the Editor.
     """
     global _registered_entries
-    
+
     try:
         tool_menus = unreal.ToolMenus.get()
         file_menu = tool_menus.find_menu("LevelEditor.MainMenu.File")
-        
+
         if file_menu:
             # Remove our section
             # Note: UE5 Python API may not support direct removal
             pass
-            
+
         _registered_entries.clear()
         print("[ROA] Editor menus unregistered")
-        
+
     except Exception as e:
         print(f"[ROA] Could not unregister menus: {e}")
 
@@ -445,6 +435,7 @@ def unregister_menus():
 # =============================================================================
 # AUTO-INITIALIZATION
 # =============================================================================
+
 
 def _on_module_load():
     """
@@ -455,7 +446,7 @@ def _on_module_load():
         # Check if we're running in the Editor
         if unreal.SystemLibrary.is_running_in_editor():
             print("[ROA] Editor menu module loaded")
-            
+
             # Delay registration slightly to ensure Editor is fully initialized
             # Using an EditorTicker would be ideal, but simple delayed call works for most cases
             try:
@@ -465,10 +456,14 @@ def _on_module_load():
                 if success:
                     print("[ROA] ✓ FTI menus auto-registered successfully!")
                 else:
-                    print("[ROA] Auto-registration deferred. Run 'from ROA.editor_menu import register_menus; register_menus()' to add menu items")
+                    print(
+                        "[ROA] Auto-registration deferred. Run 'from ROA.editor_menu import register_menus; register_menus()' to add menu items"
+                    )
             except Exception as reg_error:
                 print(f"[ROA] Auto-registration deferred (reason: {reg_error})")
-                print("[ROA] Run 'from ROA.editor_menu import register_menus; register_menus()' to add menu items")
+                print(
+                    "[ROA] Run 'from ROA.editor_menu import register_menus; register_menus()' to add menu items"
+                )
     except Exception as e:
         # Not in Editor or unreal module not fully available
         pass
@@ -484,10 +479,11 @@ _on_module_load()
 
 # These can be called directly from Python console
 
+
 def assemble(robot_name: str = ""):
     """
     Quick assembly command.
-    
+
     Usage:
         assemble()          # Opens file dialog or lists available
         assemble("ur18")    # Assembles specific robot

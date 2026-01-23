@@ -8,14 +8,14 @@ This package contains the implementations of the two control modes:
 Also includes mode management and transition logic.
 """
 
-from .rpm_mode import RPMMode
 from .adm_mode import ADMMode
-from .mode_manager import ModeManager, ControlMode, ModeTransitionResult
+from .mode_manager import ControlMode, ModeManager, ModeTransitionResult
+from .rpm_mode import RPMMode
 
 __all__ = [
-    'RPMMode', 
-    'ADMMode',
-    'ModeManager',
-    'ControlMode',
-    'ModeTransitionResult',
+    "RPMMode",
+    "ADMMode",
+    "ModeManager",
+    "ControlMode",
+    "ModeTransitionResult",
 ]

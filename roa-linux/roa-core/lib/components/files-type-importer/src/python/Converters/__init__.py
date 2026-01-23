@@ -23,19 +23,20 @@ Advanced features:
 """
 
 from .base_converter import BaseConverter, ConversionResult
-from .urdf_converter import URDFConverter
-from .stl_converter import STLConverter
-from .obj_converter import OBJConverter
 from .dae_converter import DAEConverter
-from .step_converter import STEPConverter
-from .iges_converter import IGESConverter
 from .fbx_converter import FBXConverter
-from .sdf_converter import SDFConverter
 from .gltf_converter import GLTFConverter
+from .iges_converter import IGESConverter
+from .obj_converter import OBJConverter
+from .sdf_converter import SDFConverter
+from .step_converter import STEPConverter
+from .stl_converter import STLConverter
+from .urdf_converter import URDFConverter
 
 # Optional converters (may have additional dependencies)
 try:
     from .cad_converter import CADConverter, JointDefinition, KinematicsWizard
+
     _cad_available = True
 except ImportError:
     CADConverter = None
@@ -45,12 +46,13 @@ except ImportError:
 
 try:
     from .parallel_mechanism_exporter import (
-        ParallelMechanismExporter,
-        LoopDetector,
-        GeometricConstraintDetector,
-        WorldTransformComputer,
         BreakPointSelector,
+        GeometricConstraintDetector,
+        LoopDetector,
+        ParallelMechanismExporter,
+        WorldTransformComputer,
     )
+
     _parallel_available = True
 except ImportError:
     ParallelMechanismExporter = None
@@ -63,16 +65,17 @@ except ImportError:
 # Submechanism support (SMURF-compatible kinematic groups)
 try:
     from .submechanism import (
-        Submechanism,
-        SubmechanismType,
-        SubmechanismDetector,
-        SubmechanismManager,
-        LoopConstraint,
         JointCoupling,
         JointCouplingType,
-        detect_and_create_submechanisms,
+        LoopConstraint,
+        Submechanism,
+        SubmechanismDetector,
+        SubmechanismManager,
+        SubmechanismType,
         create_submechanism_from_joints,
+        detect_and_create_submechanisms,
     )
+
     _submechanism_available = True
 except ImportError:
     Submechanism = None
@@ -89,17 +92,18 @@ except ImportError:
 # SMURF format support
 try:
     from .smurf_support import (
-        SMURFData,
-        SMURFParser,
-        SMURFWriter,
         SMURFConverter,
-        SMURFMotor,
-        SMURFSensor,
+        SMURFData,
         SMURFMaterial,
+        SMURFMotor,
+        SMURFParser,
+        SMURFSensor,
+        SMURFWriter,
         load_smurf,
-        save_smurf,
         merge_urdf_smurf,
+        save_smurf,
     )
+
     _smurf_available = True
 except ImportError:
     SMURFData = None
@@ -117,15 +121,16 @@ except ImportError:
 # Format conversion utilities
 try:
     from .format_converter import (
-        URDFToSDFConverter,
+        ConversionOptions,
         SDFToURDFConverter,
         URDFToMJCFConverter,
-        ConversionOptions,
-        convert_urdf_to_sdf,
+        URDFToSDFConverter,
+        batch_convert,
         convert_sdf_to_urdf,
         convert_urdf_to_mjcf,
-        batch_convert,
+        convert_urdf_to_sdf,
     )
+
     _format_converter_available = True
 except ImportError:
     URDFToSDFConverter = None
@@ -199,39 +204,35 @@ __all__ = [
 # Converter registry for dynamic lookup
 CONVERTER_REGISTRY = {
     # Robot description formats
-    'urdf': URDFConverter,
-    'xacro': URDFConverter,  # XACRO is handled by URDF converter
-    'sdf': SDFConverter,
-    'world': SDFConverter,  # Gazebo world files
-    
+    "urdf": URDFConverter,
+    "xacro": URDFConverter,  # XACRO is handled by URDF converter
+    "sdf": SDFConverter,
+    "world": SDFConverter,  # Gazebo world files
     # Mesh formats
-    'stl': STLConverter,
-    'obj': OBJConverter,
-    
+    "stl": STLConverter,
+    "obj": OBJConverter,
     # Exchange formats
-    'dae': DAEConverter,
-    'collada': DAEConverter,
-    'gltf': GLTFConverter,
-    'glb': GLTFConverter,
-    
+    "dae": DAEConverter,
+    "collada": DAEConverter,
+    "gltf": GLTFConverter,
+    "glb": GLTFConverter,
     # CAD formats
-    'step': STEPConverter,
-    'stp': STEPConverter,
-    'iges': IGESConverter,
-    'igs': IGESConverter,
-    
+    "step": STEPConverter,
+    "stp": STEPConverter,
+    "iges": IGESConverter,
+    "igs": IGESConverter,
     # Animation/game formats
-    'fbx': FBXConverter,
+    "fbx": FBXConverter,
 }
 
 
 def get_converter_class(format_name: str):
     """
     Get the converter class for a given format name.
-    
+
     Args:
         format_name: Format name (e.g., 'urdf', 'stl', 'obj', 'dae', 'step', 'fbx')
-        
+
     Returns:
         Converter class or None if not supported
     """
@@ -241,14 +242,14 @@ def get_converter_class(format_name: str):
 def get_supported_formats() -> dict:
     """
     Get all supported formats grouped by category.
-    
+
     Returns:
         Dictionary with format categories and their extensions
     """
     return {
-        'robot_description': ['urdf', 'xacro', 'sdf', 'world'],
-        'mesh': ['stl', 'obj'],
-        'exchange': ['dae', 'collada', 'gltf', 'glb'],
-        'cad': ['step', 'stp', 'iges', 'igs'],
-        'animation': ['fbx'],
+        "robot_description": ["urdf", "xacro", "sdf", "world"],
+        "mesh": ["stl", "obj"],
+        "exchange": ["dae", "collada", "gltf", "glb"],
+        "cad": ["step", "stp", "iges", "igs"],
+        "animation": ["fbx"],
     }

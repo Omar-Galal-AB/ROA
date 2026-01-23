@@ -5,7 +5,7 @@ ROS2 service client and server handler
 """
 
 import logging
-from typing import Optional, Callable, Any
+from typing import Any, Callable, Optional
 
 
 class ServiceHandler:
@@ -16,7 +16,7 @@ class ServiceHandler:
     def __init__(self, ros2_node):
         """
         Initialize ServiceHandler
-        
+
         Args:
             ros2_node: ROS2Node instance
         """
@@ -24,17 +24,17 @@ class ServiceHandler:
         self.ros2_node = ros2_node
         self.service_clients = {}
         self.service_servers = {}
-        
+
         self.logger.info("ServiceHandler initialized")
 
     def create_client(self, service_name: str, service_type: Any):
         """
         Create a service client
-        
+
         Args:
             service_name: Name of the service
             service_type: Service type class
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -52,12 +52,12 @@ class ServiceHandler:
     def create_server(self, service_name: str, service_type: Any, callback: Callable):
         """
         Create a service server
-        
+
         Args:
             service_name: Name of the service
             service_type: Service type class
             callback: Callback function for service requests
-            
+
         Returns:
             Service server or None
         """
@@ -76,12 +76,12 @@ class ServiceHandler:
     def call_service(self, service_name: str, request: Any, timeout_sec: float = 5.0):
         """
         Call a service synchronously
-        
+
         Args:
             service_name: Name of the service
             request: Service request
             timeout_sec: Timeout in seconds
-            
+
         Returns:
             Service response or None
         """

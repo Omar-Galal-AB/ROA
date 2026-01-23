@@ -14,9 +14,8 @@ Implementation Instructions:
 # STEP 1: Import QoS Profiles
 # =============================================================================
 
-from qos_profiles import SAFETY_QOS, COORDINATION_QOS, STATUS_QOS
+from qos_profiles import COORDINATION_QOS, SAFETY_QOS, STATUS_QOS
 from rclpy.qos import QoSProfile
-
 
 # =============================================================================
 # STEP 2: Apply to Proximity Alerts in comc_node.py
@@ -34,8 +33,8 @@ from rclpy.qos import QoSProfile
 # NEW (with Safety QoS):
 self.proximity_alert_pub = self.create_publisher(
     ProximityAlert,
-    'proximity_alerts',
-    SAFETY_QOS  # ← Use SAFETY_QOS for fast, best-effort delivery
+    "proximity_alerts",
+    SAFETY_QOS,  # ← Use SAFETY_QOS for fast, best-effort delivery
 )
 
 
@@ -46,9 +45,7 @@ self.proximity_alert_pub = self.create_publisher(
 # Emergency stop messages also need SAFETY_QOS:
 
 self.emergency_stop_pub = self.create_publisher(
-    EmergencyStop,
-    'emergency_stop',
-    SAFETY_QOS  # ← Critical: must be fast
+    EmergencyStop, "emergency_stop", SAFETY_QOS  # ← Critical: must be fast
 )
 
 
@@ -59,9 +56,7 @@ self.emergency_stop_pub = self.create_publisher(
 # Work area updates need COORDINATION_QOS:
 
 self.work_area_pub = self.create_publisher(
-    WorkArea,
-    'work_areas',
-    COORDINATION_QOS  # ← Reliable, late joiners get data
+    WorkArea, "work_areas", COORDINATION_QOS  # ← Reliable, late joiners get data
 )
 
 
@@ -73,8 +68,8 @@ self.work_area_pub = self.create_publisher(
 
 self.task_coordination_pub = self.create_publisher(
     TaskCoordination,
-    'task_coordination',
-    COORDINATION_QOS  # ← Must not lose coordination messages
+    "task_coordination",
+    COORDINATION_QOS,  # ← Must not lose coordination messages
 )
 
 
@@ -85,9 +80,7 @@ self.task_coordination_pub = self.create_publisher(
 # Heartbeat messages use STATUS_QOS:
 
 self.heartbeat_pub = self.create_publisher(
-    Heartbeat,
-    'heartbeat',
-    STATUS_QOS  # ← Best effort, latest only
+    Heartbeat, "heartbeat", STATUS_QOS  # ← Best effort, latest only
 )
 
 
@@ -98,9 +91,7 @@ self.heartbeat_pub = self.create_publisher(
 # Fleet discovery uses STATUS_QOS for announcements:
 
 self.discovery_pub = self.create_publisher(
-    DiscoveryMessage,
-    'fleet_discovery',
-    STATUS_QOS  # ← Best effort discovery
+    DiscoveryMessage, "fleet_discovery", STATUS_QOS  # ← Best effort discovery
 )
 
 

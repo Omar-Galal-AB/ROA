@@ -7,4 +7,4 @@ replacing the v0.1 TCP bridge with direct rclpy integration.
 
 from .ros2_node import ROABridgeNode
 
-__all__ = ['ROABridgeNode']
+__all__ = ["ROABridgeNode"]

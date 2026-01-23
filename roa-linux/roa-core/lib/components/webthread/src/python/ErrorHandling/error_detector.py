@@ -5,14 +5,15 @@ Error detection system
 """
 
 import logging
-from typing import Dict, List, Optional, Callable
-from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Callable, Dict, List, Optional
 
 
 class ErrorSeverity(Enum):
     """Error severity levels"""
+
     CRITICAL = "critical"
     ERROR = "error"
     WARNING = "warning"
@@ -22,6 +23,7 @@ class ErrorSeverity(Enum):
 @dataclass
 class DetectedError:
     """Detected error information"""
+
     timestamp: datetime
     severity: ErrorSeverity
     source: str
@@ -37,21 +39,25 @@ class ErrorDetector:
         self.logger = logging.getLogger(__name__)
         self.detected_errors: List[DetectedError] = []
         self.error_callbacks: List[Callable] = []
-        
+
         self.logger.info("ErrorDetector initialized")
 
-    def detect_error(self, source: str, message: str, 
-                    severity: ErrorSeverity = ErrorSeverity.ERROR,
-                    details: Optional[Dict] = None) -> DetectedError:
+    def detect_error(
+        self,
+        source: str,
+        message: str,
+        severity: ErrorSeverity = ErrorSeverity.ERROR,
+        details: Optional[Dict] = None,
+    ) -> DetectedError:
         """
         Detect and record an error
-        
+
         Args:
             source: Error source
             message: Error message
             severity: Error severity
             details: Additional details
-            
+
         Returns:
             DetectedError object
         """
@@ -60,22 +66,19 @@ class ErrorDetector:
             severity=severity,
             source=source,
             message=message,
-            details=details or {}
+            details=details or {},
         )
-        
+
         self.detected_errors.append(error)
-        self.logger.log(
-            self._severity_to_log_level(severity),
-            f"{source}: {message}"
-        )
-        
+        self.logger.log(self._severity_to_log_level(severity), f"{source}: {message}")
+
         # Notify callbacks
         for callback in self.error_callbacks:
             try:
                 callback(error)
             except Exception as e:
                 self.logger.error(f"Error in error callback: {e}")
-        
+
         return error
 
     def _severity_to_log_level(self, severity: ErrorSeverity) -> int:

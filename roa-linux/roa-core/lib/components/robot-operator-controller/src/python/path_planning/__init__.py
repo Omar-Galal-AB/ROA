@@ -9,4 +9,4 @@ Provides path planning algorithms for ADM mode:
 from .a_star import AStarPlanner
 from .rrt import RRTPlanner
 
-__all__ = ['AStarPlanner', 'RRTPlanner']
+__all__ = ["AStarPlanner", "RRTPlanner"]

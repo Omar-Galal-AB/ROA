@@ -45,163 +45,141 @@ Component Ports:
 
 Usage:
     from hb_subsystem import HBSubsystem, HBAgent, ActivityType
-    
+
     # In Webthread Core:
     hb = HBSubsystem()
     hb.start()
-    
+
     # In Components:
     agent = HBAgent('FTI')
     agent.start()
     agent.report_activity(ActivityType.MESSAGE_PROCESSED)
 """
 
+# Agent for components
+from .hb_agent import ActivityScope, HBAgent, IdleMonitor
+
+# Receiver
+from .hb_receiver import ComponentReceiver, HBReceiver
+
 # Main subsystem
 from .hb_subsystem import HBSubsystem, create_hb_subsystem
 
-# Agent for components
-from .hb_agent import HBAgent, ActivityScope, IdleMonitor
-
 # Types and constants
-from .hb_types import (
-    # Timing
-    HBTiming,
-    HBPorts,
-    
-    # Activity
-    ActivityType,
+from .hb_types import (  # Timing; Activity; States; Packets; Health status; Circuit breaker; Failures; Utilities
     ActivityCategory,
-    validate_activities,
-    
-    # States
-    ComponentState,
-    TransitionState,
-    HealthLevel,
+    ActivityType,
     AlertLevel,
-    
-    # Packets
-    HeartbeatPacket,
-    StartupPing,
-    StartupAck,
-    
-    # Health status
-    ComponentHealthStatus,
-    ComponentID,
-    
-    # Circuit breaker
     CircuitBreakerState,
     CircuitBreakerStatus,
-    
-    # Failures
-    FailureType,
+    ComponentHealthStatus,
+    ComponentID,
+    ComponentState,
     FailureEvent,
-    
-    # Utilities
-    is_sequence_gap,
-    calculate_sequence_gap,
-    get_timestamp_us,
+    FailureType,
+    HBPorts,
+    HBTiming,
+    HealthLevel,
+    HeartbeatPacket,
+    StartupAck,
+    StartupPing,
+    TransitionState,
     activity_to_bitmap,
     bitmap_to_activities,
+    calculate_sequence_gap,
+    get_timestamp_us,
+    is_sequence_gap,
+    validate_activities,
+)
+
+# Watchdog
+from .hb_watchdog import ComponentWatchdog, HBWatchdog, WatchdogStatus
+
+# Health aggregation
+from .health_aggregator import (
+    CircuitBreaker,
+    FailureScenarioHandler,
+    HealthAggregator,
+    RecoveryAction,
+    RecoveryAttempt,
+    RecoveryManager,
+    TrendAnalyzer,
 )
 
 # Overload protection
 from .overload_protection import (
-    Bulkhead,
-    RateLimiter,
     AdaptiveLimiter,
+    Bulkhead,
+    BulkheadFullError,
     MinRateDetector,
     OverloadProtector,
     OverloadProtectorFactory,
-    BulkheadFullError,
+    RateLimiter,
     RateLimitExceededError,
 )
-
-# Receiver
-from .hb_receiver import HBReceiver, ComponentReceiver
-
-# Health aggregation
-from .health_aggregator import (
-    HealthAggregator,
-    CircuitBreaker,
-    RecoveryManager,
-    RecoveryAction,
-    RecoveryAttempt,
-    TrendAnalyzer,
-    FailureScenarioHandler,
-)
-
-# Watchdog
-from .hb_watchdog import HBWatchdog, ComponentWatchdog, WatchdogStatus
 
 # Persistence
 from .state_persistence import StatePersistence, StateRecovery
 
 __all__ = [
     # Main
-    'HBSubsystem',
-    'create_hb_subsystem',
-    
+    "HBSubsystem",
+    "create_hb_subsystem",
     # Agent
-    'HBAgent',
-    'ActivityScope',
-    'IdleMonitor',
-    
+    "HBAgent",
+    "ActivityScope",
+    "IdleMonitor",
     # Types
-    'HBTiming',
-    'HBPorts',
-    'ActivityType',
-    'ActivityCategory',
-    'validate_activities',
-    'ComponentState',
-    'TransitionState',
-    'HealthLevel',
-    'AlertLevel',
-    'HeartbeatPacket',
-    'StartupPing',
-    'StartupAck',
-    'ComponentHealthStatus',
-    'ComponentID',
-    'CircuitBreakerState',
-    'CircuitBreakerStatus',
-    'FailureType',
-    'FailureEvent',
-    'is_sequence_gap',
-    'calculate_sequence_gap',
-    'get_timestamp_us',
-    'activity_to_bitmap',
-    'bitmap_to_activities',
-    
+    "HBTiming",
+    "HBPorts",
+    "ActivityType",
+    "ActivityCategory",
+    "validate_activities",
+    "ComponentState",
+    "TransitionState",
+    "HealthLevel",
+    "AlertLevel",
+    "HeartbeatPacket",
+    "StartupPing",
+    "StartupAck",
+    "ComponentHealthStatus",
+    "ComponentID",
+    "CircuitBreakerState",
+    "CircuitBreakerStatus",
+    "FailureType",
+    "FailureEvent",
+    "is_sequence_gap",
+    "calculate_sequence_gap",
+    "get_timestamp_us",
+    "activity_to_bitmap",
+    "bitmap_to_activities",
     # Overload
-    'Bulkhead',
-    'RateLimiter',
-    'AdaptiveLimiter',
-    'MinRateDetector',
-    'OverloadProtector',
-    'OverloadProtectorFactory',
-    'BulkheadFullError',
-    'RateLimitExceededError',
-    
+    "Bulkhead",
+    "RateLimiter",
+    "AdaptiveLimiter",
+    "MinRateDetector",
+    "OverloadProtector",
+    "OverloadProtectorFactory",
+    "BulkheadFullError",
+    "RateLimitExceededError",
     # Receiver
-    'HBReceiver',
-    'ComponentReceiver',
-    
+    "HBReceiver",
+    "ComponentReceiver",
     # Aggregator
-    'HealthAggregator',
-    'CircuitBreaker',
-    'RecoveryManager',
-    'RecoveryAction',
-    'RecoveryAttempt',
-    'TrendAnalyzer',
-    'FailureScenarioHandler',
-    
+    "HealthAggregator",
+    "CircuitBreaker",
+    "RecoveryManager",
+    "RecoveryAction",
+    "RecoveryAttempt",
+    "TrendAnalyzer",
+    "FailureScenarioHandler",
     # Watchdog
-    'HBWatchdog',
-    'ComponentWatchdog',
-    'WatchdogStatus',
-    
+    "HBWatchdog",
+    "ComponentWatchdog",
+    "WatchdogStatus",
     # Persistence
-    'StatePersistence',
-    'StateRecovery',
+    "StatePersistence",
+    "StateRecovery",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

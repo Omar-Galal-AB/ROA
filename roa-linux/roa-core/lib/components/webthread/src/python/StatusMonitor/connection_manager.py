@@ -5,12 +5,13 @@ Connection management for status monitoring
 """
 
 import logging
-from typing import Dict, List, Optional
 from enum import Enum
+from typing import Dict, List, Optional
 
 
 class ConnectionStatus(Enum):
     """Connection status enumeration"""
+
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
@@ -24,27 +25,27 @@ class ConnectionManager:
         """Initialize Connection Manager"""
         self.logger = logging.getLogger(__name__)
         self.connections: Dict[str, ConnectionStatus] = {}
-        
+
         # Initialize connection tracking
-        self.connections['ROS2'] = ConnectionStatus.DISCONNECTED
-        self.connections['UE5'] = ConnectionStatus.DISCONNECTED
-        self.connections['Gazebo'] = ConnectionStatus.DISCONNECTED
-        
+        self.connections["ROS2"] = ConnectionStatus.DISCONNECTED
+        self.connections["UE5"] = ConnectionStatus.DISCONNECTED
+        self.connections["Gazebo"] = ConnectionStatus.DISCONNECTED
+
         self.logger.info("ConnectionManager initialized")
 
     def connect(self, connection_name: str) -> bool:
         """
         Establish connection
-        
+
         Args:
             connection_name: Name of the connection
-            
+
         Returns:
             True if successful
         """
         self.logger.info(f"Connecting to {connection_name}...")
         self.connections[connection_name] = ConnectionStatus.CONNECTING
-        
+
         try:
             # TODO: Implement actual connection logic
             self.connections[connection_name] = ConnectionStatus.CONNECTED
@@ -75,7 +76,4 @@ class ConnectionManager:
 
     def are_all_connected(self) -> bool:
         """Check if all connections are established"""
-        return all(
-            status == ConnectionStatus.CONNECTED 
-            for status in self.connections.values()
-        )
+        return all(status == ConnectionStatus.CONNECTED for status in self.connections.values())
