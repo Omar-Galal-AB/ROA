@@ -12,7 +12,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  # COMMENTED OUT - contains our source code!
 lib64/
 parts/
 sdist/
