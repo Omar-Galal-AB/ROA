@@ -1,0 +1,224 @@
+version: "3.8"
+
+# =============================================================================
+# ROA Complete Observability Stack
+# All tools are 100% open-source and self-hosted
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # FOXGLOVE STUDIO - ROS2 Visualization (Self-Hosted)
+  # ===========================================================================
+  foxglove-studio:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: roa-foxglove-studio
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./foxglove/default-layout.json:/foxglove/default-layout.json:ro
+    restart: unless-stopped
+    labels:
+      - "roa.service=visualization"
+      - "roa.component=foxglove"
+
+  # ===========================================================================
+  # GRAFANA - Dashboards & Alerting
+  # ===========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: roa-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=roa_admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-pyroscope-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    restart: unless-stopped
+    labels:
+      - "roa.service=dashboards"
+
+  # ===========================================================================
+  # PROMETHEUS - Metrics Database
+  # ===========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: roa-prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+    restart: unless-stopped
+    labels:
+      - "roa.service=metrics"
+
+  # ===========================================================================
+  # LOKI - Log Aggregation
+  # ===========================================================================
+  loki:
+    image: grafana/loki:latest
+    container_name: roa-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+    restart: unless-stopped
+    labels:
+      - "roa.service=logs"
+
+  # ===========================================================================
+  # TEMPO - Distributed Tracing
+  # ===========================================================================
+  tempo:
+    image: grafana/tempo:latest
+    container_name: roa-tempo
+    ports:
+      - "3200:3200"   # Tempo HTTP
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "9411:9411"   # Zipkin
+      - "14268:14268" # Jaeger
+    command: ["-config.file=/etc/tempo/tempo-config.yaml"]
+    volumes:
+      - tempo_data:/tmp/tempo
+      - ./tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+    restart: unless-stopped
+    labels:
+      - "roa.service=tracing"
+
+  # ===========================================================================
+  # PYROSCOPE - Continuous Profiling
+  # ===========================================================================
+  pyroscope:
+    image: grafana/pyroscope:latest
+    container_name: roa-pyroscope
+    ports:
+      - "4040:4040"
+    volumes:
+      - pyroscope_data:/data
+    restart: unless-stopped
+    labels:
+      - "roa.service=profiling"
+
+  # ===========================================================================
+  # MIMIR - Long-term Metrics Storage (Optional - for scaling)
+  # ===========================================================================
+  mimir:
+    image: grafana/mimir:latest
+    container_name: roa-mimir
+    ports:
+      - "9009:9009"
+    command:
+      - "-config.file=/etc/mimir/mimir-config.yaml"
+      - "-target=all"
+    volumes:
+      - mimir_data:/data
+      - ./mimir/mimir-config.yaml:/etc/mimir/mimir-config.yaml:ro
+    profiles:
+      - mimir  # Only start with --profile mimir
+    restart: unless-stopped
+    labels:
+      - "roa.service=metrics-longterm"
+
+  # ===========================================================================
+  # GRAFANA ALLOY - OpenTelemetry Collector
+  # ===========================================================================
+  alloy:
+    image: grafana/alloy:latest
+    container_name: roa-alloy
+    ports:
+      - "12345:12345"  # Alloy UI
+      - "4320:4317"    # OTLP gRPC (shifted to avoid Tempo conflict when running standalone)
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+    environment:
+      - LOKI_HOST=loki:3100
+      - PROMETHEUS_HOST=prometheus:9090
+      - TEMPO_HOST=tempo:4317
+      - PYROSCOPE_HOST=pyroscope:4040
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+      - pyroscope
+    restart: unless-stopped
+    labels:
+      - "roa.service=collector"
+
+  # ===========================================================================
+  # FLUENT BIT - Log Collector
+  # ===========================================================================
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: roa-fluent-bit
+    ports:
+      - "2020:2020"  # HTTP metrics
+      - "2021:2021"  # Prometheus exporter
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ../../data/logs:/var/log/roa:ro  # Mount ROA logs from app folder
+    depends_on:
+      - loki
+    restart: unless-stopped
+    labels:
+      - "roa.service=log-collector"
+
+  # ===========================================================================
+  # BEYLA - eBPF Auto-Instrumentation (Linux only, requires privileges)
+  # ===========================================================================
+  beyla:
+    image: grafana/beyla:latest
+    container_name: roa-beyla
+    privileged: true
+    pid: "host"
+    environment:
+      - BEYLA_PROMETHEUS_PORT=9400
+      - BEYLA_OPEN_PORT=9877-9882  # ROA HB ports
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+    network_mode: host
+    profiles:
+      - beyla  # Only start with --profile beyla
+    restart: unless-stopped
+    labels:
+      - "roa.service=auto-instrument"
+
+volumes:
+  grafana_data:
+    name: roa_grafana_data
+  prometheus_data:
+    name: roa_prometheus_data
+  loki_data:
+    name: roa_loki_data
+  tempo_data:
+    name: roa_tempo_data
+  pyroscope_data:
+    name: roa_pyroscope_data
+  mimir_data:
+    name: roa_mimir_data
+
+networks:
+  default:
+    name: roa_observability

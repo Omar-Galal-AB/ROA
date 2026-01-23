@@ -1,0 +1,166 @@
+# =============================================================================
+# Prometheus Configuration for ROA
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: roa-local
+    environment: development
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Rule files
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+# =============================================================================
+# Scrape Configurations
+# =============================================================================
+
+scrape_configs:
+  # -------------------------------------------------------------------------
+  # Infrastructure Monitoring
+  # -------------------------------------------------------------------------
+  
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          app: prometheus
+          tier: infrastructure
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          app: grafana
+          tier: infrastructure
+
+  # Loki
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+        labels:
+          app: loki
+          tier: infrastructure
+
+  # Tempo
+  - job_name: 'tempo'
+    static_configs:
+      - targets: ['tempo:3200']
+        labels:
+          app: tempo
+          tier: infrastructure
+
+  # Pyroscope
+  - job_name: 'pyroscope'
+    static_configs:
+      - targets: ['pyroscope:4040']
+        labels:
+          app: pyroscope
+          tier: infrastructure
+
+  # Alloy
+  - job_name: 'alloy'
+    static_configs:
+      - targets: ['alloy:12345']
+        labels:
+          app: alloy
+          tier: infrastructure
+
+  # Fluent Bit
+  - job_name: 'fluent-bit'
+    metrics_path: /api/v1/metrics/prometheus
+    static_configs:
+      - targets: ['fluent-bit:2020']
+        labels:
+          app: fluent-bit
+          tier: infrastructure
+
+  # Fluent Bit custom metrics
+  - job_name: 'fluent-bit-custom'
+    static_configs:
+      - targets: ['fluent-bit:2021']
+        labels:
+          app: fluent-bit
+          tier: infrastructure
+
+  # -------------------------------------------------------------------------
+  # ROA Components (running on host)
+  # -------------------------------------------------------------------------
+
+  # ROA Webthread
+  - job_name: 'roa-webthread'
+    static_configs:
+      - targets: ['host.docker.internal:9800']
+        labels:
+          app: roa
+          component: webthread
+          tier: application
+
+  # ROA FTI
+  - job_name: 'roa-fti'
+    static_configs:
+      - targets: ['host.docker.internal:9801']
+        labels:
+          app: roa
+          component: fti
+          tier: application
+
+  # ROA DIMC
+  - job_name: 'roa-dimc'
+    static_configs:
+      - targets: ['host.docker.internal:9802']
+        labels:
+          app: roa
+          component: dimc
+          tier: application
+
+  # ROA ROC
+  - job_name: 'roa-roc'
+    static_configs:
+      - targets: ['host.docker.internal:9803']
+        labels:
+          app: roa
+          component: roc
+          tier: application
+
+  # ROA COMC
+  - job_name: 'roa-comc'
+    static_configs:
+      - targets: ['host.docker.internal:9804']
+        labels:
+          app: roa
+          component: comc
+          tier: application
+
+  # -------------------------------------------------------------------------
+  # Beyla (eBPF auto-instrumentation)
+  # -------------------------------------------------------------------------
+
+  - job_name: 'beyla'
+    static_configs:
+      - targets: ['host.docker.internal:9400']
+        labels:
+          app: beyla
+          tier: instrumentation
+
+  # -------------------------------------------------------------------------
+  # k6 Load Testing (when running)
+  # -------------------------------------------------------------------------
+
+  - job_name: 'k6'
+    static_configs:
+      - targets: ['host.docker.internal:6565']
+        labels:
+          app: k6
+          tier: testing

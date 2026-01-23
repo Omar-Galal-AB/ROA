@@ -1,0 +1,78 @@
+name: UE5 Plugin Build
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ue5-plugin/**'
+      - '.github/workflows/ue5-build.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'ue5-plugin/**'
+
+jobs:
+  validate:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check plugin structure
+      run: |
+        # Verify required files exist
+        test -f ue5-plugin/ROA.uplugin || (echo "Missing ROA.uplugin" && exit 1)
+        test -d ue5-plugin/Source/ROA || (echo "Missing Source/ROA" && exit 1)
+        test -d ue5-plugin/Resources/Python || (echo "Missing Resources/Python" && exit 1)
+        echo "✅ Plugin structure validated"
+
+    - name: Validate .uplugin JSON
+      run: |
+        python3 -m json.tool ue5-plugin/ROA.uplugin > /dev/null
+        echo "✅ ROA.uplugin is valid JSON"
+
+    - name: Check for debug/temp files
+      run: |
+        # Fail if debug files exist
+        if find ue5-plugin -name "*.pdb" -o -name "*.exp" -o -name "*.lib" | grep -q .; then
+          echo "❌ Found debug/build files that should be .gitignored"
+          find ue5-plugin -name "*.pdb" -o -name "*.exp" -o -name "*.lib"
+          exit 1
+        fi
+        echo "✅ No debug files found"
+
+  lint-cpp:
+    name: C++ Code Quality
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check C++ code formatting
+      run: |
+        # Basic checks for now
+        echo "ℹ️ C++ linting placeholder (requires clang-format config)"
+        # Future: clang-format --dry-run --Werror ue5-plugin/Source/**/*.cpp
+
+  python-scripts:
+    name: Validate Python Scripts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Syntax check Python scripts
+      run: |
+        python -m py_compile ue5-plugin/Resources/Python/*.py
+        echo "✅ Python syntax validated"
+
+    - name: Install and check dependencies
+      run: |
+        pip install lxml
+        echo "✅ Dependencies installable"

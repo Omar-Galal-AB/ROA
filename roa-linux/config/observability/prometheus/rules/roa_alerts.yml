@@ -1,0 +1,185 @@
+# =============================================================================
+# Prometheus Alert Rules for ROA
+# =============================================================================
+
+groups:
+  # ---------------------------------------------------------------------------
+  # ROA Component Health
+  # ---------------------------------------------------------------------------
+  - name: roa.component.health
+    interval: 30s
+    rules:
+      - alert: ROAComponentDown
+        expr: up{job=~"roa.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: robotics
+        annotations:
+          summary: "ROA component {{ $labels.component }} is down"
+          description: "The ROA {{ $labels.component }} component has been down for more than 1 minute."
+          runbook_url: "https://docs.roa.local/runbooks/component-down"
+
+      - alert: ROAComponentHighCPU
+        expr: rate(process_cpu_seconds_total{job=~"roa.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "High CPU usage on {{ $labels.component }}"
+          description: "ROA {{ $labels.component }} is using more than 80% CPU for 5 minutes."
+
+      - alert: ROAComponentHighMemory
+        expr: process_resident_memory_bytes{job=~"roa.*"} > 1073741824
+        for: 5m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "High memory usage on {{ $labels.component }}"
+          description: "ROA {{ $labels.component }} is using more than 1GB of memory."
+
+  # ---------------------------------------------------------------------------
+  # ROA Heartbeat Monitoring
+  # ---------------------------------------------------------------------------
+  - name: roa.heartbeat
+    interval: 15s
+    rules:
+      - alert: ROAHeartbeatMissed
+        expr: time() - roa_heartbeat_last_seen_timestamp > 10
+        for: 30s
+        labels:
+          severity: critical
+          team: robotics
+        annotations:
+          summary: "Heartbeat missed from {{ $labels.component }}"
+          description: "No heartbeat received from {{ $labels.component }} for more than 10 seconds."
+
+      - alert: ROAHeartbeatSlowInterval
+        expr: roa_heartbeat_interval_seconds > 5
+        for: 1m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "Slow heartbeat interval on {{ $labels.component }}"
+          description: "Heartbeat interval on {{ $labels.component }} is {{ $value }}s (expected <5s)."
+
+  # ---------------------------------------------------------------------------
+  # Log Monitoring
+  # ---------------------------------------------------------------------------
+  - name: roa.logs
+    interval: 1m
+    rules:
+      - alert: ROAHighErrorRate
+        expr: |
+          sum(rate(roa_log_messages_total{level="ERROR"}[5m])) by (component)
+          / sum(rate(roa_log_messages_total[5m])) by (component) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "High error rate in {{ $labels.component }} logs"
+          description: "More than 5% of log messages from {{ $labels.component }} are errors."
+
+      - alert: ROANoLogs
+        expr: |
+          sum(rate(roa_log_messages_total[5m])) by (component) == 0
+          and on(component) up{job=~"roa.*"} == 1
+        for: 10m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "No logs from {{ $labels.component }}"
+          description: "Component {{ $labels.component }} is up but producing no logs for 10 minutes."
+
+  # ---------------------------------------------------------------------------
+  # Infrastructure
+  # ---------------------------------------------------------------------------
+  - name: roa.infrastructure
+    interval: 1m
+    rules:
+      - alert: FluentBitDown
+        expr: up{job="fluent-bit"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Fluent Bit log collector is down"
+          description: "Log collection is failing. Logs may be lost."
+
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Loki log storage is down"
+          description: "Log queries will fail. New logs may be buffered."
+
+      - alert: TempoDown
+        expr: up{job="tempo"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Tempo tracing backend is down"
+          description: "Trace collection and queries will fail."
+
+      - alert: PrometheusStorageFull
+        expr: |
+          (prometheus_tsdb_storage_blocks_bytes / prometheus_tsdb_retention_limit_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Prometheus storage is nearly full"
+          description: "Prometheus storage is at {{ $value | humanizePercentage }} capacity."
+
+      - alert: LokiStorageHigh
+        expr: |
+          sum(loki_ingester_memory_chunks) > 100000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Loki ingester memory usage high"
+          description: "Loki has {{ $value }} chunks in memory."
+
+  # ---------------------------------------------------------------------------
+  # Performance
+  # ---------------------------------------------------------------------------
+  - name: roa.performance
+    interval: 30s
+    rules:
+      - alert: ROAHighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=~"roa.*"}[5m])) by (le, component))
+          > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "High latency on {{ $labels.component }}"
+          description: "P95 latency on {{ $labels.component }} is {{ $value | humanizeDuration }}."
+
+      - alert: ROAHighTraceErrorRate
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{status_code="STATUS_CODE_ERROR"}[5m])) by (service)
+          / sum(rate(traces_spanmetrics_calls_total[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: robotics
+        annotations:
+          summary: "High trace error rate on {{ $labels.service }}"
+          description: "More than 5% of traced operations on {{ $labels.service }} are failing."

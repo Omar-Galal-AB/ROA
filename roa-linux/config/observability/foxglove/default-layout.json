@@ -1,0 +1,29 @@
+{
+  "configById": {},
+  "globalVariables": {},
+  "layout": {
+    "direction": "row",
+    "first": {
+      "direction": "column",
+      "first": "3D",
+      "second": "RawMessages",
+      "splitPercentage": 70
+    },
+    "second": {
+      "direction": "column", 
+      "first": "Plot",
+      "second": {
+        "direction": "column",
+        "first": "Log",
+        "second": "StateTransitions",
+        "splitPercentage": 50
+      },
+      "splitPercentage": 40
+    },
+    "splitPercentage": 60
+  },
+  "playbackConfig": {
+    "speed": 1
+  },
+  "userNodes": {}
+}

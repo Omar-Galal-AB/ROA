@@ -1,0 +1,31 @@
+{
+    "FileVersion": 3,
+    "Version": 2,
+    "VersionName": "0.2.0-alpha",
+    "FriendlyName": "ROA - Robot Operator Assistant",
+    "Description": "Robot control and simulation plugin for Unreal Engine 5. Native ROS2 integration via embedded rclcpp for low-latency (<5ms) communication. Component-based architecture with sensors (Camera, LiDAR, IMU), improved FTI (URDF import with materials, collision decomposition), and multi-robot coordination support.",
+    "Category": "Robotics",
+    "CreatedBy": "ROA Development Team",
+    "CreatedByURL": "https://github.com/Omar-Galal-AB/ROA",
+    "DocsURL": "",
+    "MarketplaceURL": "",
+    "SupportURL": "",
+    "CanContainContent": true,
+    "IsBetaVersion": true,
+    "IsExperimentalVersion": false,
+    "Installed": false,
+    "Modules": [
+        {
+            "Name": "ROA",
+            "Type": "Runtime",
+            "LoadingPhase": "Default",
+            "WhitelistPlatforms": [ "Win64", "Linux" ]
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "PythonScriptPlugin",
+            "Enabled": true
+        }
+    ]
+}

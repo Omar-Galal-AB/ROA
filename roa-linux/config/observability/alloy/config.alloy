@@ -1,0 +1,247 @@
+// =============================================================================
+// Grafana Alloy Configuration for ROA
+// OpenTelemetry Collector + Prometheus + Loki + Tempo + Pyroscope
+// =============================================================================
+
+// =============================================================================
+// LOGGING - Forward Alloy's own logs to Loki
+// =============================================================================
+
+logging {
+    level  = "info"
+    format = "logfmt"
+    write_to = [loki.process.alloy_logs.receiver]
+}
+
+loki.process "alloy_logs" {
+    forward_to = [loki.write.loki.receiver]
+    
+    stage.labels {
+        values = {
+            level = "",
+        }
+    }
+    
+    stage.static_labels {
+        values = {
+            job = "alloy",
+            component = "collector",
+        }
+    }
+}
+
+// =============================================================================
+// TRACING - Forward Alloy's own traces to Tempo
+// =============================================================================
+
+tracing {
+    sampling_fraction = 0.1  // 10% sampling in production
+    write_to = [otelcol.exporter.otlp.tempo.input]
+}
+
+// =============================================================================
+// OTEL RECEIVER - Receive telemetry from applications
+// =============================================================================
+
+otelcol.receiver.otlp "default" {
+    grpc {
+        endpoint = "0.0.0.0:4317"
+    }
+    http {
+        endpoint = "0.0.0.0:4318"
+    }
+    output {
+        metrics = [otelcol.processor.batch.default.input]
+        logs    = [otelcol.processor.batch.default.input]
+        traces  = [otelcol.processor.batch.default.input]
+    }
+}
+
+// =============================================================================
+// OTEL PROCESSOR - Batch for efficiency
+// =============================================================================
+
+otelcol.processor.batch "default" {
+    timeout = "5s"
+    send_batch_size = 8192
+    send_batch_max_size = 16384
+    
+    output {
+        metrics = [otelcol.processor.attributes.add_metadata.input]
+        logs    = [otelcol.processor.attributes.add_metadata.input]
+        traces  = [otelcol.processor.attributes.add_metadata.input]
+    }
+}
+
+// Add ROA metadata to all telemetry
+otelcol.processor.attributes "add_metadata" {
+    action {
+        key = "roa.version"
+        value = "1.0.0"
+        action = "insert"
+    }
+    action {
+        key = "roa.cluster"
+        value = "local"
+        action = "insert"
+    }
+    action {
+        key = "deployment.environment"
+        value = coalesce(sys.env("ROA_ENV"), "development")
+        action = "insert"
+    }
+    
+    output {
+        metrics = [otelcol.exporter.prometheus.prometheus.input]
+        logs    = [otelcol.exporter.loki.loki.input]
+        traces  = [otelcol.exporter.otlp.tempo.input]
+    }
+}
+
+// =============================================================================
+// EXPORTERS - Send to backends
+// =============================================================================
+
+// Export metrics to Prometheus
+otelcol.exporter.prometheus "prometheus" {
+    forward_to = [prometheus.remote_write.prometheus.receiver]
+}
+
+// Export logs to Loki
+otelcol.exporter.loki "loki" {
+    forward_to = [loki.write.loki.receiver]
+}
+
+// Export traces to Tempo
+otelcol.exporter.otlp "tempo" {
+    client {
+        endpoint = coalesce(sys.env("TEMPO_HOST"), "tempo:4317")
+        tls {
+            insecure = true
+        }
+    }
+}
+
+// =============================================================================
+// PROMETHEUS - Scraping and Remote Write
+// =============================================================================
+
+// Self-monitoring
+prometheus.exporter.self "alloy" {}
+
+prometheus.scrape "alloy_self" {
+    targets    = prometheus.exporter.self.alloy.targets
+    forward_to = [prometheus.remote_write.prometheus.receiver]
+    scrape_interval = "15s"
+}
+
+// Remote write to Prometheus
+prometheus.remote_write "prometheus" {
+    endpoint {
+        url = string.format(
+            "http://%s/api/v1/write",
+            coalesce(sys.env("PROMETHEUS_HOST"), "prometheus:9090"),
+        )
+    }
+}
+
+// =============================================================================
+// LOKI - Log Writing
+// =============================================================================
+
+loki.write "loki" {
+    endpoint {
+        url = string.format(
+            "http://%s/loki/api/v1/push",
+            coalesce(sys.env("LOKI_HOST"), "loki:3100"),
+        )
+    }
+    external_labels = {
+        cluster = "roa-local",
+        environment = coalesce(sys.env("ROA_ENV"), "development"),
+    }
+}
+
+// =============================================================================
+// PYROSCOPE - Profile Collection
+// =============================================================================
+
+pyroscope.scrape "alloy" {
+    targets = [
+        {"__address__" = "localhost:12345", "service_name" = "alloy"},
+    ]
+    forward_to = [pyroscope.write.pyroscope.receiver]
+    profiling_config {
+        profile.process_cpu {
+            enabled = true
+        }
+        profile.memory {
+            enabled = true
+        }
+        profile.goroutine {
+            enabled = true
+        }
+    }
+}
+
+pyroscope.write "pyroscope" {
+    endpoint {
+        url = string.format(
+            "http://%s",
+            coalesce(sys.env("PYROSCOPE_HOST"), "pyroscope:4040"),
+        )
+    }
+    external_labels = {
+        cluster = "roa-local",
+    }
+}
+
+// =============================================================================
+// ROA COMPONENT SCRAPING (Optional - when components expose /metrics)
+// =============================================================================
+
+// Uncomment when ROA components expose Prometheus metrics
+
+// prometheus.scrape "roa_webthread" {
+//     targets = [
+//         {"__address__" = "host.docker.internal:9800"},
+//     ]
+//     forward_to = [prometheus.remote_write.prometheus.receiver]
+//     job_name = "roa-webthread"
+// }
+
+// prometheus.scrape "roa_fti" {
+//     targets = [
+//         {"__address__" = "host.docker.internal:9801"},
+//     ]
+//     forward_to = [prometheus.remote_write.prometheus.receiver]
+//     job_name = "roa-fti"
+// }
+
+// =============================================================================
+// DISCOVERY - Dynamic target discovery (for Kubernetes, etc.)
+// =============================================================================
+
+// Uncomment for Kubernetes deployment
+
+// discovery.kubernetes "pods" {
+//     role = "pod"
+//     namespaces {
+//         names = ["roa"]
+//     }
+// }
+
+// discovery.relabel "roa_pods" {
+//     targets = discovery.kubernetes.pods.targets
+//     
+//     rule {
+//         source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+//         regex = "true"
+//         action = "keep"
+//     }
+//     
+//     rule {
+//         source_labels = ["__meta_kubernetes_pod_name"]
+//         target_label = "pod"
+//     }
+// }

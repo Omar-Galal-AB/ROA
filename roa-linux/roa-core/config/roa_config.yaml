@@ -1,0 +1,45 @@
+# ROA Configuration File
+version: "0.1.0"
+mode: standalone  # standalone or ue5_plugin
+
+# UE5 Integration (via port forwarding from WSL to Windows)
+ue5_host: "localhost"  # WSL IP - port forwarded to Windows localhost
+ue5_port: 9876
+
+# Component settings
+components:
+  webthread:
+    enabled: true
+    port: 8080
+  fti:
+    enabled: true
+    conversion_path: ~/.roa/conversions
+  roc:
+    enabled: true
+    controller_type: ps5  # ps5, xbox, keyboard
+  dimc:
+    enabled: true
+    update_rate: 60  # Hz
+  comc:
+    enabled: true
+
+# File management
+file_management:
+  snapshot_retention: 24  # hours
+  backup_retention: 30  # days
+  archive_retention: 365  # days
+  auto_tier: true
+  tier_schedule: "02:00"  # Daily at 2 AM
+
+# Communication
+communication:
+  primary: wifi
+  fallback: [wifi_long_range, 4g, bluetooth]
+  wifi_range: 100  # meters
+  
+# Logging
+logging:
+  level: INFO
+  file: ~/.roa/logs/roa.log
+  max_size: 10  # MB
+  backup_count: 5

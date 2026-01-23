@@ -1,0 +1,42 @@
+# Robot Configuration Template
+robot_id: robot_001
+robot_name: "Example Robot"
+robot_type: manipulator  # manipulator, mobile, aerial, marine
+
+# Physical properties
+joints: 6
+max_payload: 5.0  # kg
+reach: 0.8  # meters
+
+# Sensors
+sensors:
+  - type: camera
+    name: main_camera
+    topic: /robot_001/camera/image
+  - type: lidar
+    name: lidar_2d
+    topic: /robot_001/scan
+  - type: imu
+    name: imu
+    topic: /robot_001/imu/data
+
+# Error definitions
+errors:
+  - code: E001
+    name: "Joint Limit Exceeded"
+    severity: warning
+    action: stop_joint
+  - code: E002
+    name: "Collision Detected"
+    severity: critical
+    action: emergency_stop
+  - code: E003
+    name: "Communication Lost"
+    severity: critical
+    action: safe_mode
+
+# Control parameters
+control:
+  max_velocity: 1.0  # m/s or rad/s
+  max_acceleration: 0.5
+  safety_level: standard  # fragile, standard, robust

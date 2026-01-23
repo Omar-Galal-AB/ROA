@@ -1,0 +1,89 @@
+name: Python Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'roa-linux/**/*.py'
+      - 'roa-linux/**/requirements.txt'
+      - '.github/workflows/python-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'roa-linux/**/*.py'
+      - 'roa-linux/**/requirements.txt'
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        cd roa-linux/roa-core
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run FTI tests
+      run: |
+        cd roa-linux/roa-core/lib/components/files-type-importer
+        python -m pytest tests/ -v --cov=src/python --cov-report=xml --cov-report=term
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./roa-linux/roa-core/lib/components/files-type-importer/coverage.xml
+        flags: python-${{ matrix.python-version }}
+        name: python-${{ matrix.python-version }}-${{ matrix.os }}
+
+  lint:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install linting tools
+      run: |
+        pip install black flake8 mypy isort
+
+    - name: Check code formatting (black)
+      run: |
+        cd roa-linux/roa-core
+        black --check lib/
+
+    - name: Lint with flake8
+      run: |
+        cd roa-linux/roa-core
+        flake8 lib/ --max-line-length=100 --ignore=E203,W503
+
+    - name: Check import sorting (isort)
+      run: |
+        cd roa-linux/roa-core
+        isort --check-only lib/
+
+    - name: Type checking (mypy)
+      run: |
+        cd roa-linux/roa-core
+        mypy lib/ --ignore-missing-imports
+      continue-on-error: true  # Warnings only for now

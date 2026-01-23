@@ -1,0 +1,66 @@
+name: Documentation Issue
+description: Report missing, unclear, or incorrect documentation
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve ROA documentation!
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Documentation Type
+      description: What kind of documentation needs work?
+      options:
+        - README / Getting Started
+        - Installation Guide
+        - Usage Guide / Tutorial
+        - API Documentation
+        - Architecture Documentation
+        - Code Comments
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: File/Location
+      description: "Which file or section? (e.g., README.md, ue5-plugin/Guides/INDEX.md)"
+      placeholder: "path/to/file.md"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue Type
+      description: What's wrong with the documentation?
+      options:
+        - Missing information
+        - Incorrect/outdated information
+        - Unclear explanation
+        - Typo/grammar
+        - Broken link
+        - Code example doesn't work
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to be fixed or added?
+      placeholder: Describe the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: How should it be improved?
+      placeholder: Your suggested changes

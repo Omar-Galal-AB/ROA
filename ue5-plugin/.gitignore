@@ -1,0 +1,42 @@
+# ROA UE5 Plugin - Git Ignore
+
+# Binaries and build artifacts
+Binaries/
+Intermediate/
+DerivedDataCache/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.vs/
+*.swp
+*.swo
+
+# UE5 generated
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Patch files (hot reload)
+*.patch_*.exp
+
+# Third-party dependencies (too large for repo)
+# Users should follow ThirdParty/INTEGRATION_GUIDE.md to set up
+ThirdParty/FastDDS/
+ThirdParty/Python/
+ThirdParty/rclcpp/
+
+# Keep setup scripts and guide
+!ThirdParty/INTEGRATION_GUIDE.md
+!ThirdParty/setup_bundled_python.ps1
+!ThirdParty/INSTALLATION_COMPLETE.txt
+
+# Backup files
+*.bak
+*.backup*
+*.backup_pre_timer

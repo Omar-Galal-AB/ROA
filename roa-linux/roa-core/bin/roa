@@ -1,0 +1,7 @@
+#!/bin/bash
+# ROA Launcher Script
+# Resolve symlinks to get the real script location
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+ROA_HOME="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
+export PYTHONPATH="${ROA_HOME}/lib:${PYTHONPATH}"
+python3 "${ROA_HOME}/lib/roa_main.py" "$@"

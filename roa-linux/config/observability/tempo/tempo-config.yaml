@@ -1,0 +1,134 @@
+# =============================================================================
+# Tempo Configuration for ROA - Distributed Tracing
+# =============================================================================
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+  log_level: info
+
+# Distributor configuration - receives traces
+distributor:
+  receivers:
+    # OpenTelemetry Protocol
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    # Zipkin
+    zipkin:
+      endpoint: 0.0.0.0:9411
+    # Jaeger
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: 0.0.0.0:14268
+        grpc:
+          endpoint: 0.0.0.0:14250
+        thrift_compact:
+          endpoint: 0.0.0.0:6831
+        thrift_binary:
+          endpoint: 0.0.0.0:6832
+  log_received_spans:
+    enabled: true
+    include_all_attributes: false
+
+# Ingester configuration
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+
+# Compactor configuration
+compactor:
+  compaction:
+    compaction_window: 1h
+    max_block_bytes: 100_000_000
+    block_retention: 168h  # 7 days
+    compacted_block_retention: 1h
+  ring:
+    kvstore:
+      store: inmemory
+
+# Storage configuration
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+    wal:
+      path: /tmp/tempo/wal
+    pool:
+      max_workers: 100
+      queue_depth: 10000
+
+# Querier configuration
+querier:
+  frontend_worker:
+    frontend_address: 127.0.0.1:9095
+  max_concurrent_queries: 20
+  search:
+    query_timeout: 30s
+
+# Query frontend
+query_frontend:
+  search:
+    concurrent_jobs: 1000
+    target_bytes_per_job: 104857600  # 100MB
+  trace_by_id:
+    query_shards: 50
+
+# Metrics generator - creates RED metrics from traces
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: roa-local
+  storage:
+    path: /tmp/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+
+  # Generate span metrics
+  processor:
+    span_metrics:
+      dimensions:
+        - service.name
+        - span.name
+        - span.kind
+        - status.code
+      enable_target_info: true
+      
+    # Generate service graphs
+    service_graphs:
+      dimensions:
+        - service.name
+      enable_client_server_prefix: true
+      enable_messaging_system_latency_histogram: true
+      enable_virtual_node_label: true
+
+# Overrides
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]
+      generate_native_histograms: both
+    ingestion:
+      rate_limit_bytes: 15000000  # 15MB/s
+      burst_size_bytes: 20000000  # 20MB
+    search:
+      max_duration: 168h  # 7 days
+    read:
+      max_search_duration: 168h
+
+# Usage reporting
+usage_report:
+  reporting_enabled: false

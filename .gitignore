@@ -1,0 +1,64 @@
+# ROA Repository - Root .gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE settings
+.vscode/
+.idea/
+.vs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+venv/
+.venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build outputs
+*.deb
+*.rpm
+build/roa_*.deb
+
+# Logs and data (generated at runtime)
+*.log
+data/logs/
+data/metrics/
+data/traces/
+
+# Cache
+.cache/
+fti_cache/
+
+# IPC files
+.ipc/
+
+# UE5 specific
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+*.patch_*.exp
+
+# Third-party dependencies (too large, see ThirdParty/INTEGRATION_GUIDE.md)
+ue5-plugin/ThirdParty/FastDDS/
+ue5-plugin/ThirdParty/Python/
+ue5-plugin/ThirdParty/rclcpp/
+
+# Robot models (1GB - excluded, see robot-models/README.md for download)
+robot-models/Robo_Models/
+
+# Backup files
+*.bak
+*.backup*
