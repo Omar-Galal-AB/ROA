@@ -27,7 +27,7 @@ ROA (Robot Operator Assistant) is a cross-platform robotics simulation and contr
       ┌───────┐     ┌───────┐  ┌──────┐    ┌──────┐
       │  FTI  │     │ DIMC  │  │ ROC  │    │ COMC │
       │3D Imp │     │Spatial│  │Ctrl  │    │Multi │
-      │  ✅   │     │  📋   │  │ 📋   │    │ 📋   │
+      │  ✅  │     │  📋   │  │ 📋  │    │ 📋   │
       └───────┘     └───────┘  └──────┘    └──────┘
 ```
 
