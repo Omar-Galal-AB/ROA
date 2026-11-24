@@ -12,7 +12,7 @@
 If you discover a security vulnerability in ROA, please report it privately:
 
 1. **Do NOT open a public issue**
-2. **Email:** security@[your-domain].com (or use GitHub's private vulnerability reporting)
+2. **Email:** omer.galal33@gmail.com (or use GitHub's private vulnerability reporting)
 3. **Include:**
    - Component affected (roa-linux, ue5-plugin, etc.)
    - Detailed description
