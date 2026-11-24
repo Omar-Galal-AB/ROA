@@ -75,6 +75,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **v7.x** - Internal development versions for Blueprint/constraint fixes
 - **0.x.0** - Release versions following semver
 
-[Unreleased]: https://github.com/your-org/ROA/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/your-org/ROA/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/your-org/ROA/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Omar-Galal-AB/ROA/compare/v0.2.0-alpha...HEAD
+[0.2.0]: https://github.com/Omar-Galal-AB/ROA/releases/tag/v0.2.0-alpha
+[0.1.0]: https://github.com/Omar-Galal-AB/ROA/releases/tag/v0.1.0
