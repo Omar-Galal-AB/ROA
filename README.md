@@ -37,6 +37,13 @@ ROA (Robot Operator Assistant) is a cross-platform robotics simulation and contr
 - **ROC** (Robot Controller): 📋 Planned - Manual + strategic control modes
 - **COMC** (Communication Center): 📋 Planned - Multi-robot coordination
 
+### Visual Overview
+
+| WSL Webthread Monitor & ROS2 Heartbeat Supervision | WSL Files Type Importer (FTI) — OpenUSD Converter | UE5.6 Verified UR10e Assembly |
+|---|---|---|
+| ![WSL Webthread Monitor](docs/images/roa_wsl_webthread_monitor.jpg) | ![WSL FTI OpenUSD Converter](docs/images/roa_wsl_fti_openusd_converter.jpg) | ![UE5.6 UR10e Assembly](docs/images/roa_ue5_ur10e_verified.jpg) |
+| *Fault-tolerant supervision: active ROS2 topics, microservice circuit breakers, and monitored IPC ports.* | *Windows-to-WSL path ingestion converting URDF/XACRO/CAD models into OpenUSD & UE5 Blueprints.* | *Automated URDF → OpenUSD → Unreal Engine 5.6 import with gravity-stable joint constraints.* |
+
 ---
 
 ## 📁 Repository Structure
@@ -74,10 +81,10 @@ ROA/
 ├── robot-models/                 # 3D robot models (1GB)
 │   └── ROBOT_MODELS_CATALOG.md
 │
-└── docs/                         # Shared documentation
-    ├── ARCHITECTURE.md
-    ├── AI_CONTEXT.md
-    └── guides/
+└── docs/                         # Shared documentation & thesis
+    ├── images/                   # System & simulation screenshots
+    └── Thesis/
+        └── ROA_EN_V5.pdf         # Passed B.Sc. Thesis (81 pages)
 ```
 
 ---
@@ -333,7 +340,7 @@ python -m pytest tests/ -v  # 30+ tests, 80%+ coverage
 
 **Rebuild plugin (Windows PowerShell):**
 ```powershell
-cd D:\ROA\UE5_Projects\ROA_V1
+cd <YOUR_UE5_PROJECT_PATH>
 .\rebuild_plugin.ps1
 ```
 
@@ -342,11 +349,13 @@ cd D:\ROA\UE5_Projects\ROA_V1
 ## 📖 Documentation
 
 | Document | Description |
-|----------|-------------|| [DEPENDENCIES.md](DEPENDENCIES.md) | All external projects, plugins, and libraries |
-| [SIMILAR_PROJECTS_RESEARCH.md](roa-linux/docs/SIMILAR_PROJECTS_RESEARCH.md) | Research on 12+ robotics projects || [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture deep-dive |
-| [docs/AI_CONTEXT.md](docs/AI_CONTEXT.md) | Comprehensive development context |
+|----------|-------------|
+| [DEPENDENCIES.md](DEPENDENCIES.md) | All external projects, plugins, and libraries |
+| [SIMILAR_PROJECTS_RESEARCH.md](roa-linux/docs/SIMILAR_PROJECTS_RESEARCH.md) | Research on 12+ robotics projects |
+| [roa-linux/docs/ARCHITECTURE.md](roa-linux/docs/ARCHITECTURE.md) | System architecture deep-dive |
+| [B.Sc. Thesis (ROA_EN_V5.pdf)](docs/Thesis/ROA_EN_V5.pdf) | Full 81-page system architecture, closed-loop control analysis & design trade-offs |
 | [ue5-plugin/Guides/INDEX.md](ue5-plugin/Guides/INDEX.md) | UE5 plugin documentation |
-| [roa-linux/docs/](roa-linux/docs/) | Component requirements |
+| [roa-linux/docs/](roa-linux/docs/) | Component requirements & guides |
 
 ---
 
